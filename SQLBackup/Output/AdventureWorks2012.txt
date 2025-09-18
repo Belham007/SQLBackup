@@ -1,0 +1,1274 @@
+CREATE TABLE [Production].[Production.ScrapReason] (
+  [ScrapReasonID] smallint NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ScrapReason] ADD CONSTRAINT [PK_ScrapReason_ScrapReasonID] PRIMARY KEY ([ScrapReasonID]);
+ALTER TABLE [Production].[Production.ScrapReason] ADD CONSTRAINT [DF_ScrapReason_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_ScrapReason_Name] ON [Production].[Production.ScrapReason] ([Name]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [HumanResources].[HumanResources.Shift] (
+  [ShiftID] tinyint NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [StartTime] time NOT NULL,
+  [EndTime] time NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [HumanResources].[HumanResources.Shift] ADD CONSTRAINT [PK_Shift_ShiftID] PRIMARY KEY ([ShiftID]);
+ALTER TABLE [HumanResources].[HumanResources.Shift] ADD CONSTRAINT [DF_Shift_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_Shift_Name] ON [HumanResources].[HumanResources.Shift] ([Name]);
+CREATE UNIQUE INDEX [AK_Shift_StartTime_EndTime] ON [HumanResources].[HumanResources.Shift] ([StartTime], [EndTime]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductCategory] (
+  [ProductCategoryID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductCategory] ADD CONSTRAINT [PK_ProductCategory_ProductCategoryID] PRIMARY KEY ([ProductCategoryID]);
+ALTER TABLE [Production].[Production.ProductCategory] ADD CONSTRAINT [DF_ProductCategory_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Production].[Production.ProductCategory] ADD CONSTRAINT [DF_ProductCategory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_ProductCategory_Name] ON [Production].[Production.ProductCategory] ([Name]);
+CREATE UNIQUE INDEX [AK_ProductCategory_rowguid] ON [Production].[Production.ProductCategory] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Purchasing].[Purchasing.ShipMethod] (
+  [ShipMethodID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [ShipBase] money NOT NULL,
+  [ShipRate] money NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Purchasing].[Purchasing.ShipMethod] ADD CONSTRAINT [PK_ShipMethod_ShipMethodID] PRIMARY KEY ([ShipMethodID]);
+ALTER TABLE [Purchasing].[Purchasing.ShipMethod] ADD CONSTRAINT [DF_ShipMethod_ShipBase] DEFAULT ((0.00)) FOR [ShipBase];
+ALTER TABLE [Purchasing].[Purchasing.ShipMethod] ADD CONSTRAINT [DF_ShipMethod_ShipRate] DEFAULT ((0.00)) FOR [ShipRate];
+ALTER TABLE [Purchasing].[Purchasing.ShipMethod] ADD CONSTRAINT [DF_ShipMethod_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Purchasing].[Purchasing.ShipMethod] ADD CONSTRAINT [DF_ShipMethod_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Purchasing].[Purchasing.ShipMethod] ADD CONSTRAINT [CK_ShipMethod_ShipBase] CHECK ([ShipBase]>(0.00));
+ALTER TABLE [Purchasing].[Purchasing.ShipMethod] ADD CONSTRAINT [CK_ShipMethod_ShipRate] CHECK ([ShipRate]>(0.00));
+CREATE UNIQUE INDEX [AK_ShipMethod_Name] ON [Purchasing].[Purchasing.ShipMethod] ([Name]);
+CREATE UNIQUE INDEX [AK_ShipMethod_rowguid] ON [Purchasing].[Purchasing.ShipMethod] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductCostHistory] (
+  [ProductID] int NOT NULL,
+  [StartDate] datetime NOT NULL,
+  [EndDate] datetime NULL,
+  [StandardCost] money NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductCostHistory] ADD CONSTRAINT [PK_ProductCostHistory_ProductID_StartDate] PRIMARY KEY ([ProductID], [StartDate]);
+ALTER TABLE [Production].[Production.ProductCostHistory] ADD CONSTRAINT [FK_ProductCostHistory_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.ProductCostHistory] ADD CONSTRAINT [DF_ProductCostHistory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.ProductCostHistory] ADD CONSTRAINT [CK_ProductCostHistory_EndDate] CHECK ([EndDate]>=[StartDate] OR [EndDate] IS NULL);
+ALTER TABLE [Production].[Production.ProductCostHistory] ADD CONSTRAINT [CK_ProductCostHistory_StandardCost] CHECK ([StandardCost]>=(0.00));
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductDescription] (
+  [ProductDescriptionID] int NOT NULL IDENTITY(1,1),
+  [Description] nvarchar(800) NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductDescription] ADD CONSTRAINT [PK_ProductDescription_ProductDescriptionID] PRIMARY KEY ([ProductDescriptionID]);
+ALTER TABLE [Production].[Production.ProductDescription] ADD CONSTRAINT [DF_ProductDescription_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Production].[Production.ProductDescription] ADD CONSTRAINT [DF_ProductDescription_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_ProductDescription_rowguid] ON [Production].[Production.ProductDescription] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.ShoppingCartItem] (
+  [ShoppingCartItemID] int NOT NULL IDENTITY(1,1),
+  [ShoppingCartID] nvarchar(100) NOT NULL,
+  [Quantity] int NOT NULL,
+  [ProductID] int NOT NULL,
+  [DateCreated] datetime NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.ShoppingCartItem] ADD CONSTRAINT [PK_ShoppingCartItem_ShoppingCartItemID] PRIMARY KEY ([ShoppingCartItemID]);
+ALTER TABLE [Sales].[Sales.ShoppingCartItem] ADD CONSTRAINT [FK_ShoppingCartItem_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Sales].[Sales.ShoppingCartItem] ADD CONSTRAINT [DF_ShoppingCartItem_Quantity] DEFAULT ((1)) FOR [Quantity];
+ALTER TABLE [Sales].[Sales.ShoppingCartItem] ADD CONSTRAINT [DF_ShoppingCartItem_DateCreated] DEFAULT (getdate()) FOR [DateCreated];
+ALTER TABLE [Sales].[Sales.ShoppingCartItem] ADD CONSTRAINT [DF_ShoppingCartItem_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.ShoppingCartItem] ADD CONSTRAINT [CK_ShoppingCartItem_Quantity] CHECK ([Quantity]>=(1));
+CREATE INDEX [IX_ShoppingCartItem_ShoppingCartID_ProductID] ON [Sales].[Sales.ShoppingCartItem] ([ShoppingCartID], [ProductID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductDocument] (
+  [ProductID] int NOT NULL,
+  [DocumentNode] hierarchyid NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductDocument] ADD CONSTRAINT [PK_ProductDocument_ProductID_DocumentNode] PRIMARY KEY ([ProductID], [DocumentNode]);
+ALTER TABLE [Production].[Production.ProductDocument] ADD CONSTRAINT [FK_ProductDocument_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.ProductDocument] ADD CONSTRAINT [FK_ProductDocument_Document_DocumentNode] FOREIGN KEY (DocumentNode) REFERENCES [Production].[Document](DocumentNode);
+ALTER TABLE [Production].[Production.ProductDocument] ADD CONSTRAINT [DF_ProductDocument_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.DatabaseLog] (
+  [DatabaseLogID] int NOT NULL IDENTITY(1,1),
+  [PostTime] datetime NOT NULL,
+  [DatabaseUser] sysname NOT NULL,
+  [Event] sysname NOT NULL,
+  [Schema] sysname NULL,
+  [Object] sysname NULL,
+  [TSQL] nvarchar(MAX) NOT NULL,
+  [XmlEvent] xml NOT NULL
+)
+ALTER TABLE [dbo].[dbo.DatabaseLog] ADD CONSTRAINT [PK_DatabaseLog_DatabaseLogID] PRIMARY KEY ([DatabaseLogID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductInventory] (
+  [ProductID] int NOT NULL,
+  [LocationID] smallint NOT NULL,
+  [Shelf] nvarchar(20) NOT NULL,
+  [Bin] tinyint NOT NULL,
+  [Quantity] smallint NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductInventory] ADD CONSTRAINT [PK_ProductInventory_ProductID_LocationID] PRIMARY KEY ([ProductID], [LocationID]);
+ALTER TABLE [Production].[Production.ProductInventory] ADD CONSTRAINT [FK_ProductInventory_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.ProductInventory] ADD CONSTRAINT [FK_ProductInventory_Location_LocationID] FOREIGN KEY (LocationID) REFERENCES [Production].[Location](LocationID);
+ALTER TABLE [Production].[Production.ProductInventory] ADD CONSTRAINT [DF_ProductInventory_Quantity] DEFAULT ((0)) FOR [Quantity];
+ALTER TABLE [Production].[Production.ProductInventory] ADD CONSTRAINT [DF_ProductInventory_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Production].[Production.ProductInventory] ADD CONSTRAINT [DF_ProductInventory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.ProductInventory] ADD CONSTRAINT [CK_ProductInventory_Shelf] CHECK ([Shelf] like '[A-Za-z]' OR [Shelf]='N/A');
+ALTER TABLE [Production].[Production.ProductInventory] ADD CONSTRAINT [CK_ProductInventory_Bin] CHECK ([Bin]>=(0) AND [Bin]<=(100));
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SpecialOffer] (
+  [SpecialOfferID] int NOT NULL IDENTITY(1,1),
+  [Description] nvarchar(510) NOT NULL,
+  [DiscountPct] smallmoney NOT NULL,
+  [Type] nvarchar(100) NOT NULL,
+  [Category] nvarchar(100) NOT NULL,
+  [StartDate] datetime NOT NULL,
+  [EndDate] datetime NOT NULL,
+  [MinQty] int NOT NULL,
+  [MaxQty] int NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [PK_SpecialOffer_SpecialOfferID] PRIMARY KEY ([SpecialOfferID]);
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [DF_SpecialOffer_DiscountPct] DEFAULT ((0.00)) FOR [DiscountPct];
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [DF_SpecialOffer_MinQty] DEFAULT ((0)) FOR [MinQty];
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [DF_SpecialOffer_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [DF_SpecialOffer_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [CK_SpecialOffer_EndDate] CHECK ([EndDate]>=[StartDate]);
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [CK_SpecialOffer_DiscountPct] CHECK ([DiscountPct]>=(0.00));
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [CK_SpecialOffer_MinQty] CHECK ([MinQty]>=(0));
+ALTER TABLE [Sales].[Sales.SpecialOffer] ADD CONSTRAINT [CK_SpecialOffer_MaxQty] CHECK ([MaxQty]>=(0));
+CREATE UNIQUE INDEX [AK_SpecialOffer_rowguid] ON [Sales].[Sales.SpecialOffer] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.ErrorLog] (
+  [ErrorLogID] int NOT NULL IDENTITY(1,1),
+  [ErrorTime] datetime NOT NULL,
+  [UserName] sysname NOT NULL,
+  [ErrorNumber] int NOT NULL,
+  [ErrorSeverity] int NULL,
+  [ErrorState] int NULL,
+  [ErrorProcedure] nvarchar(252) NULL,
+  [ErrorLine] int NULL,
+  [ErrorMessage] nvarchar(8000) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.ErrorLog] ADD CONSTRAINT [PK_ErrorLog_ErrorLogID] PRIMARY KEY ([ErrorLogID]);
+ALTER TABLE [dbo].[dbo.ErrorLog] ADD CONSTRAINT [DF_ErrorLog_ErrorTime] DEFAULT (getdate()) FOR [ErrorTime];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductListPriceHistory] (
+  [ProductID] int NOT NULL,
+  [StartDate] datetime NOT NULL,
+  [EndDate] datetime NULL,
+  [ListPrice] money NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductListPriceHistory] ADD CONSTRAINT [PK_ProductListPriceHistory_ProductID_StartDate] PRIMARY KEY ([ProductID], [StartDate]);
+ALTER TABLE [Production].[Production.ProductListPriceHistory] ADD CONSTRAINT [FK_ProductListPriceHistory_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.ProductListPriceHistory] ADD CONSTRAINT [DF_ProductListPriceHistory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.ProductListPriceHistory] ADD CONSTRAINT [CK_ProductListPriceHistory_EndDate] CHECK ([EndDate]>=[StartDate] OR [EndDate] IS NULL);
+ALTER TABLE [Production].[Production.ProductListPriceHistory] ADD CONSTRAINT [CK_ProductListPriceHistory_ListPrice] CHECK ([ListPrice]>(0.00));
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.Address] (
+  [AddressID] int NOT NULL IDENTITY(1,1),
+  [AddressLine1] nvarchar(120) NOT NULL,
+  [AddressLine2] nvarchar(120) NULL,
+  [City] nvarchar(60) NOT NULL,
+  [StateProvinceID] int NOT NULL,
+  [PostalCode] nvarchar(30) NOT NULL,
+  [SpatialLocation] geography NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.Address] ADD CONSTRAINT [PK_Address_AddressID] PRIMARY KEY ([AddressID]);
+ALTER TABLE [Person].[Person.Address] ADD CONSTRAINT [FK_Address_StateProvince_StateProvinceID] FOREIGN KEY (StateProvinceID) REFERENCES [Person].[StateProvince](StateProvinceID);
+ALTER TABLE [Person].[Person.Address] ADD CONSTRAINT [DF_Address_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.Address] ADD CONSTRAINT [DF_Address_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_Address_StateProvinceID] ON [Person].[Person.Address] ([StateProvinceID]);
+CREATE UNIQUE INDEX [AK_Address_rowguid] ON [Person].[Person.Address] ([rowguid]);
+CREATE UNIQUE INDEX [IX_Address_AddressLine1_AddressLine2_City_StateProvinceID_PostalCode] ON [Person].[Person.Address] ([AddressLine1], [AddressLine2], [City], [StateProvinceID], [PostalCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SpecialOfferProduct] (
+  [SpecialOfferID] int NOT NULL,
+  [ProductID] int NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SpecialOfferProduct] ADD CONSTRAINT [PK_SpecialOfferProduct_SpecialOfferID_ProductID] PRIMARY KEY ([SpecialOfferID], [ProductID]);
+ALTER TABLE [Sales].[Sales.SpecialOfferProduct] ADD CONSTRAINT [FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID] FOREIGN KEY (SpecialOfferID) REFERENCES [Sales].[SpecialOffer](SpecialOfferID);
+ALTER TABLE [Sales].[Sales.SpecialOfferProduct] ADD CONSTRAINT [FK_SpecialOfferProduct_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Sales].[Sales.SpecialOfferProduct] ADD CONSTRAINT [DF_SpecialOfferProduct_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SpecialOfferProduct] ADD CONSTRAINT [DF_SpecialOfferProduct_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_SpecialOfferProduct_ProductID] ON [Sales].[Sales.SpecialOfferProduct] ([ProductID]);
+CREATE UNIQUE INDEX [AK_SpecialOfferProduct_rowguid] ON [Sales].[Sales.SpecialOfferProduct] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductModel] (
+  [ProductModelID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [CatalogDescription] xml NULL,
+  [Instructions] xml NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductModel] ADD CONSTRAINT [PK_ProductModel_ProductModelID] PRIMARY KEY ([ProductModelID]);
+ALTER TABLE [Production].[Production.ProductModel] ADD CONSTRAINT [DF_ProductModel_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Production].[Production.ProductModel] ADD CONSTRAINT [DF_ProductModel_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [PXML_ProductModel_CatalogDescription] ON [Production].[Production.ProductModel] ([CatalogDescription]);
+CREATE INDEX [PXML_ProductModel_Instructions] ON [Production].[Production.ProductModel] ([Instructions]);
+CREATE UNIQUE INDEX [AK_ProductModel_Name] ON [Production].[Production.ProductModel] ([Name]);
+CREATE UNIQUE INDEX [AK_ProductModel_rowguid] ON [Production].[Production.ProductModel] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.AddressType] (
+  [AddressTypeID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.AddressType] ADD CONSTRAINT [PK_AddressType_AddressTypeID] PRIMARY KEY ([AddressTypeID]);
+ALTER TABLE [Person].[Person.AddressType] ADD CONSTRAINT [DF_AddressType_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.AddressType] ADD CONSTRAINT [DF_AddressType_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_AddressType_Name] ON [Person].[Person.AddressType] ([Name]);
+CREATE UNIQUE INDEX [AK_AddressType_rowguid] ON [Person].[Person.AddressType] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.StateProvince] (
+  [StateProvinceID] int NOT NULL IDENTITY(1,1),
+  [StateProvinceCode] nchar(6) NOT NULL,
+  [CountryRegionCode] nvarchar(6) NOT NULL,
+  [IsOnlyStateProvinceFlag] Flag NOT NULL,
+  [Name] Name NOT NULL,
+  [TerritoryID] int NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.StateProvince] ADD CONSTRAINT [PK_StateProvince_StateProvinceID] PRIMARY KEY ([StateProvinceID]);
+ALTER TABLE [Person].[Person.StateProvince] ADD CONSTRAINT [FK_StateProvince_CountryRegion_CountryRegionCode] FOREIGN KEY (CountryRegionCode) REFERENCES [Person].[CountryRegion](CountryRegionCode);
+ALTER TABLE [Person].[Person.StateProvince] ADD CONSTRAINT [FK_StateProvince_SalesTerritory_TerritoryID] FOREIGN KEY (TerritoryID) REFERENCES [Sales].[SalesTerritory](TerritoryID);
+ALTER TABLE [Person].[Person.StateProvince] ADD CONSTRAINT [DF_StateProvince_IsOnlyStateProvinceFlag] DEFAULT ((1)) FOR [IsOnlyStateProvinceFlag];
+ALTER TABLE [Person].[Person.StateProvince] ADD CONSTRAINT [DF_StateProvince_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.StateProvince] ADD CONSTRAINT [DF_StateProvince_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_StateProvince_Name] ON [Person].[Person.StateProvince] ([Name]);
+CREATE UNIQUE INDEX [AK_StateProvince_rowguid] ON [Person].[Person.StateProvince] ([rowguid]);
+CREATE UNIQUE INDEX [AK_StateProvince_StateProvinceCode_CountryRegionCode] ON [Person].[Person.StateProvince] ([StateProvinceCode], [CountryRegionCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductModelIllustration] (
+  [ProductModelID] int NOT NULL,
+  [IllustrationID] int NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductModelIllustration] ADD CONSTRAINT [PK_ProductModelIllustration_ProductModelID_IllustrationID] PRIMARY KEY ([ProductModelID], [IllustrationID]);
+ALTER TABLE [Production].[Production.ProductModelIllustration] ADD CONSTRAINT [FK_ProductModelIllustration_ProductModel_ProductModelID] FOREIGN KEY (ProductModelID) REFERENCES [Production].[ProductModel](ProductModelID);
+ALTER TABLE [Production].[Production.ProductModelIllustration] ADD CONSTRAINT [FK_ProductModelIllustration_Illustration_IllustrationID] FOREIGN KEY (IllustrationID) REFERENCES [Production].[Illustration](IllustrationID);
+ALTER TABLE [Production].[Production.ProductModelIllustration] ADD CONSTRAINT [DF_ProductModelIllustration_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.AWBuildVersion] (
+  [SystemInformationID] tinyint NOT NULL IDENTITY(1,1),
+  [Database Version] nvarchar(50) NOT NULL,
+  [VersionDate] datetime NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [dbo].[dbo.AWBuildVersion] ADD CONSTRAINT [PK_AWBuildVersion_SystemInformationID] PRIMARY KEY ([SystemInformationID]);
+ALTER TABLE [dbo].[dbo.AWBuildVersion] ADD CONSTRAINT [DF_AWBuildVersion_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductModelProductDescriptionCulture] (
+  [ProductModelID] int NOT NULL,
+  [ProductDescriptionID] int NOT NULL,
+  [CultureID] nchar(12) NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductModelProductDescriptionCulture] ADD CONSTRAINT [PK_ProductModelProductDescriptionCulture_ProductModelID_ProductDescriptionID_CultureID] PRIMARY KEY ([ProductModelID], [ProductDescriptionID], [CultureID]);
+ALTER TABLE [Production].[Production.ProductModelProductDescriptionCulture] ADD CONSTRAINT [FK_ProductModelProductDescriptionCulture_ProductModel_ProductModelID] FOREIGN KEY (ProductModelID) REFERENCES [Production].[ProductModel](ProductModelID);
+ALTER TABLE [Production].[Production.ProductModelProductDescriptionCulture] ADD CONSTRAINT [FK_ProductModelProductDescriptionCulture_ProductDescription_ProductDescriptionID] FOREIGN KEY (ProductDescriptionID) REFERENCES [Production].[ProductDescription](ProductDescriptionID);
+ALTER TABLE [Production].[Production.ProductModelProductDescriptionCulture] ADD CONSTRAINT [FK_ProductModelProductDescriptionCulture_Culture_CultureID] FOREIGN KEY (CultureID) REFERENCES [Production].[Culture](CultureID);
+ALTER TABLE [Production].[Production.ProductModelProductDescriptionCulture] ADD CONSTRAINT [DF_ProductModelProductDescriptionCulture_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.BillOfMaterials] (
+  [BillOfMaterialsID] int NOT NULL IDENTITY(1,1),
+  [ProductAssemblyID] int NULL,
+  [ComponentID] int NOT NULL,
+  [StartDate] datetime NOT NULL,
+  [EndDate] datetime NULL,
+  [UnitMeasureCode] nchar(6) NOT NULL,
+  [BOMLevel] smallint NOT NULL,
+  [PerAssemblyQty] decimal(8,2) NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [PK_BillOfMaterials_BillOfMaterialsID] PRIMARY KEY ([BillOfMaterialsID]);
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [FK_BillOfMaterials_Product_ProductAssemblyID] FOREIGN KEY (ProductAssemblyID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [FK_BillOfMaterials_Product_ComponentID] FOREIGN KEY (ComponentID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [FK_BillOfMaterials_UnitMeasure_UnitMeasureCode] FOREIGN KEY (UnitMeasureCode) REFERENCES [Production].[UnitMeasure](UnitMeasureCode);
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [DF_BillOfMaterials_StartDate] DEFAULT (getdate()) FOR [StartDate];
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [DF_BillOfMaterials_PerAssemblyQty] DEFAULT ((1.00)) FOR [PerAssemblyQty];
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [DF_BillOfMaterials_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [CK_BillOfMaterials_EndDate] CHECK ([EndDate]>[StartDate] OR [EndDate] IS NULL);
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [CK_BillOfMaterials_ProductAssemblyID] CHECK ([ProductAssemblyID]<>[ComponentID]);
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [CK_BillOfMaterials_BOMLevel] CHECK ([ProductAssemblyID] IS NULL AND [BOMLevel]=(0) AND [PerAssemblyQty]=(1.00) OR [ProductAssemblyID] IS NOT NULL AND [BOMLevel]>=(1));
+ALTER TABLE [Production].[Production.BillOfMaterials] ADD CONSTRAINT [CK_BillOfMaterials_PerAssemblyQty] CHECK ([PerAssemblyQty]>=(1.00));
+CREATE INDEX [IX_BillOfMaterials_UnitMeasureCode] ON [Production].[Production.BillOfMaterials] ([UnitMeasureCode]);
+CREATE UNIQUE INDEX [AK_BillOfMaterials_ProductAssemblyID_ComponentID_StartDate] ON [Production].[Production.BillOfMaterials] ([ProductAssemblyID], [ComponentID], [StartDate]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.Store] (
+  [BusinessEntityID] int NOT NULL,
+  [Name] Name NOT NULL,
+  [SalesPersonID] int NULL,
+  [Demographics] xml NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.Store] ADD CONSTRAINT [PK_Store_BusinessEntityID] PRIMARY KEY ([BusinessEntityID]);
+ALTER TABLE [Sales].[Sales.Store] ADD CONSTRAINT [FK_Store_BusinessEntity_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[BusinessEntity](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.Store] ADD CONSTRAINT [FK_Store_SalesPerson_SalesPersonID] FOREIGN KEY (SalesPersonID) REFERENCES [Sales].[SalesPerson](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.Store] ADD CONSTRAINT [DF_Store_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.Store] ADD CONSTRAINT [DF_Store_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_Store_SalesPersonID] ON [Sales].[Sales.Store] ([SalesPersonID]);
+CREATE INDEX [PXML_Store_Demographics] ON [Sales].[Sales.Store] ([Demographics]);
+CREATE UNIQUE INDEX [AK_Store_rowguid] ON [Sales].[Sales.Store] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductPhoto] (
+  [ProductPhotoID] int NOT NULL IDENTITY(1,1),
+  [ThumbNailPhoto] varbinary NULL,
+  [ThumbnailPhotoFileName] nvarchar(100) NULL,
+  [LargePhoto] varbinary NULL,
+  [LargePhotoFileName] nvarchar(100) NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductPhoto] ADD CONSTRAINT [PK_ProductPhoto_ProductPhotoID] PRIMARY KEY ([ProductPhotoID]);
+ALTER TABLE [Production].[Production.ProductPhoto] ADD CONSTRAINT [DF_ProductPhoto_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductProductPhoto] (
+  [ProductID] int NOT NULL,
+  [ProductPhotoID] int NOT NULL,
+  [Primary] Flag NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductProductPhoto] ADD CONSTRAINT [PK_ProductProductPhoto_ProductID_ProductPhotoID] PRIMARY KEY ([ProductID], [ProductPhotoID]);
+ALTER TABLE [Production].[Production.ProductProductPhoto] ADD CONSTRAINT [FK_ProductProductPhoto_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.ProductProductPhoto] ADD CONSTRAINT [FK_ProductProductPhoto_ProductPhoto_ProductPhotoID] FOREIGN KEY (ProductPhotoID) REFERENCES [Production].[ProductPhoto](ProductPhotoID);
+ALTER TABLE [Production].[Production.ProductProductPhoto] ADD CONSTRAINT [DF_ProductProductPhoto_Primary] DEFAULT ((0)) FOR [Primary];
+ALTER TABLE [Production].[Production.ProductProductPhoto] ADD CONSTRAINT [DF_ProductProductPhoto_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.TransactionHistory] (
+  [TransactionID] int NOT NULL IDENTITY(100000,1),
+  [ProductID] int NOT NULL,
+  [ReferenceOrderID] int NOT NULL,
+  [ReferenceOrderLineID] int NOT NULL,
+  [TransactionDate] datetime NOT NULL,
+  [TransactionType] nchar(2) NOT NULL,
+  [Quantity] int NOT NULL,
+  [ActualCost] money NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.TransactionHistory] ADD CONSTRAINT [PK_TransactionHistory_TransactionID] PRIMARY KEY ([TransactionID]);
+ALTER TABLE [Production].[Production.TransactionHistory] ADD CONSTRAINT [FK_TransactionHistory_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.TransactionHistory] ADD CONSTRAINT [DF_TransactionHistory_ReferenceOrderLineID] DEFAULT ((0)) FOR [ReferenceOrderLineID];
+ALTER TABLE [Production].[Production.TransactionHistory] ADD CONSTRAINT [DF_TransactionHistory_TransactionDate] DEFAULT (getdate()) FOR [TransactionDate];
+ALTER TABLE [Production].[Production.TransactionHistory] ADD CONSTRAINT [DF_TransactionHistory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.TransactionHistory] ADD CONSTRAINT [CK_TransactionHistory_TransactionType] CHECK (upper([TransactionType])='P' OR upper([TransactionType])='S' OR upper([TransactionType])='W');
+CREATE INDEX [IX_TransactionHistory_ProductID] ON [Production].[Production.TransactionHistory] ([ProductID]);
+CREATE INDEX [IX_TransactionHistory_ReferenceOrderID_ReferenceOrderLineID] ON [Production].[Production.TransactionHistory] ([ReferenceOrderID], [ReferenceOrderLineID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductReview] (
+  [ProductReviewID] int NOT NULL IDENTITY(1,1),
+  [ProductID] int NOT NULL,
+  [ReviewerName] Name NOT NULL,
+  [ReviewDate] datetime NOT NULL,
+  [EmailAddress] nvarchar(100) NOT NULL,
+  [Rating] int NOT NULL,
+  [Comments] nvarchar(7700) NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductReview] ADD CONSTRAINT [PK_ProductReview_ProductReviewID] PRIMARY KEY ([ProductReviewID]);
+ALTER TABLE [Production].[Production.ProductReview] ADD CONSTRAINT [FK_ProductReview_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.ProductReview] ADD CONSTRAINT [DF_ProductReview_ReviewDate] DEFAULT (getdate()) FOR [ReviewDate];
+ALTER TABLE [Production].[Production.ProductReview] ADD CONSTRAINT [DF_ProductReview_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.ProductReview] ADD CONSTRAINT [CK_ProductReview_Rating] CHECK ([Rating]>=(1) AND [Rating]<=(5));
+CREATE INDEX [IX_ProductReview_ProductID_Name] ON [Production].[Production.ProductReview] ([ProductID], [ReviewerName], [Comments]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.BusinessEntity] (
+  [BusinessEntityID] int NOT NULL IDENTITY(1,1),
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.BusinessEntity] ADD CONSTRAINT [PK_BusinessEntity_BusinessEntityID] PRIMARY KEY ([BusinessEntityID]);
+ALTER TABLE [Person].[Person.BusinessEntity] ADD CONSTRAINT [DF_BusinessEntity_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.BusinessEntity] ADD CONSTRAINT [DF_BusinessEntity_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_BusinessEntity_rowguid] ON [Person].[Person.BusinessEntity] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.TransactionHistoryArchive] (
+  [TransactionID] int NOT NULL,
+  [ProductID] int NOT NULL,
+  [ReferenceOrderID] int NOT NULL,
+  [ReferenceOrderLineID] int NOT NULL,
+  [TransactionDate] datetime NOT NULL,
+  [TransactionType] nchar(2) NOT NULL,
+  [Quantity] int NOT NULL,
+  [ActualCost] money NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.TransactionHistoryArchive] ADD CONSTRAINT [PK_TransactionHistoryArchive_TransactionID] PRIMARY KEY ([TransactionID]);
+ALTER TABLE [Production].[Production.TransactionHistoryArchive] ADD CONSTRAINT [DF_TransactionHistoryArchive_ReferenceOrderLineID] DEFAULT ((0)) FOR [ReferenceOrderLineID];
+ALTER TABLE [Production].[Production.TransactionHistoryArchive] ADD CONSTRAINT [DF_TransactionHistoryArchive_TransactionDate] DEFAULT (getdate()) FOR [TransactionDate];
+ALTER TABLE [Production].[Production.TransactionHistoryArchive] ADD CONSTRAINT [DF_TransactionHistoryArchive_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.TransactionHistoryArchive] ADD CONSTRAINT [CK_TransactionHistoryArchive_TransactionType] CHECK (upper([TransactionType])='P' OR upper([TransactionType])='S' OR upper([TransactionType])='W');
+CREATE INDEX [IX_TransactionHistoryArchive_ProductID] ON [Production].[Production.TransactionHistoryArchive] ([ProductID]);
+CREATE INDEX [IX_TransactionHistoryArchive_ReferenceOrderID_ReferenceOrderLineID] ON [Production].[Production.TransactionHistoryArchive] ([ReferenceOrderID], [ReferenceOrderLineID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.ProductSubcategory] (
+  [ProductSubcategoryID] int NOT NULL IDENTITY(1,1),
+  [ProductCategoryID] int NOT NULL,
+  [Name] Name NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.ProductSubcategory] ADD CONSTRAINT [PK_ProductSubcategory_ProductSubcategoryID] PRIMARY KEY ([ProductSubcategoryID]);
+ALTER TABLE [Production].[Production.ProductSubcategory] ADD CONSTRAINT [FK_ProductSubcategory_ProductCategory_ProductCategoryID] FOREIGN KEY (ProductCategoryID) REFERENCES [Production].[ProductCategory](ProductCategoryID);
+ALTER TABLE [Production].[Production.ProductSubcategory] ADD CONSTRAINT [DF_ProductSubcategory_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Production].[Production.ProductSubcategory] ADD CONSTRAINT [DF_ProductSubcategory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_ProductSubcategory_Name] ON [Production].[Production.ProductSubcategory] ([Name]);
+CREATE UNIQUE INDEX [AK_ProductSubcategory_rowguid] ON [Production].[Production.ProductSubcategory] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.BusinessEntityAddress] (
+  [BusinessEntityID] int NOT NULL,
+  [AddressID] int NOT NULL,
+  [AddressTypeID] int NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.BusinessEntityAddress] ADD CONSTRAINT [PK_BusinessEntityAddress_BusinessEntityID_AddressID_AddressTypeID] PRIMARY KEY ([BusinessEntityID], [AddressID], [AddressTypeID]);
+ALTER TABLE [Person].[Person.BusinessEntityAddress] ADD CONSTRAINT [FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[BusinessEntity](BusinessEntityID);
+ALTER TABLE [Person].[Person.BusinessEntityAddress] ADD CONSTRAINT [FK_BusinessEntityAddress_Address_AddressID] FOREIGN KEY (AddressID) REFERENCES [Person].[Address](AddressID);
+ALTER TABLE [Person].[Person.BusinessEntityAddress] ADD CONSTRAINT [FK_BusinessEntityAddress_AddressType_AddressTypeID] FOREIGN KEY (AddressTypeID) REFERENCES [Person].[AddressType](AddressTypeID);
+ALTER TABLE [Person].[Person.BusinessEntityAddress] ADD CONSTRAINT [DF_BusinessEntityAddress_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.BusinessEntityAddress] ADD CONSTRAINT [DF_BusinessEntityAddress_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_BusinessEntityAddress_AddressID] ON [Person].[Person.BusinessEntityAddress] ([AddressID]);
+CREATE INDEX [IX_BusinessEntityAddress_AddressTypeID] ON [Person].[Person.BusinessEntityAddress] ([AddressTypeID]);
+CREATE UNIQUE INDEX [AK_BusinessEntityAddress_rowguid] ON [Person].[Person.BusinessEntityAddress] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Purchasing].[Purchasing.ProductVendor] (
+  [ProductID] int NOT NULL,
+  [BusinessEntityID] int NOT NULL,
+  [AverageLeadTime] int NOT NULL,
+  [StandardPrice] money NOT NULL,
+  [LastReceiptCost] money NULL,
+  [LastReceiptDate] datetime NULL,
+  [MinOrderQty] int NOT NULL,
+  [MaxOrderQty] int NOT NULL,
+  [OnOrderQty] int NULL,
+  [UnitMeasureCode] nchar(6) NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [PK_ProductVendor_ProductID_BusinessEntityID] PRIMARY KEY ([ProductID], [BusinessEntityID]);
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [FK_ProductVendor_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [FK_ProductVendor_Vendor_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Purchasing].[Vendor](BusinessEntityID);
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [FK_ProductVendor_UnitMeasure_UnitMeasureCode] FOREIGN KEY (UnitMeasureCode) REFERENCES [Production].[UnitMeasure](UnitMeasureCode);
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [DF_ProductVendor_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [CK_ProductVendor_AverageLeadTime] CHECK ([AverageLeadTime]>=(1));
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [CK_ProductVendor_StandardPrice] CHECK ([StandardPrice]>(0.00));
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [CK_ProductVendor_LastReceiptCost] CHECK ([LastReceiptCost]>(0.00));
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [CK_ProductVendor_MinOrderQty] CHECK ([MinOrderQty]>=(1));
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [CK_ProductVendor_MaxOrderQty] CHECK ([MaxOrderQty]>=(1));
+ALTER TABLE [Purchasing].[Purchasing.ProductVendor] ADD CONSTRAINT [CK_ProductVendor_OnOrderQty] CHECK ([OnOrderQty]>=(0));
+CREATE INDEX [IX_ProductVendor_BusinessEntityID] ON [Purchasing].[Purchasing.ProductVendor] ([BusinessEntityID]);
+CREATE INDEX [IX_ProductVendor_UnitMeasureCode] ON [Purchasing].[Purchasing.ProductVendor] ([UnitMeasureCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.BusinessEntityContact] (
+  [BusinessEntityID] int NOT NULL,
+  [PersonID] int NOT NULL,
+  [ContactTypeID] int NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.BusinessEntityContact] ADD CONSTRAINT [PK_BusinessEntityContact_BusinessEntityID_PersonID_ContactTypeID] PRIMARY KEY ([BusinessEntityID], [PersonID], [ContactTypeID]);
+ALTER TABLE [Person].[Person.BusinessEntityContact] ADD CONSTRAINT [FK_BusinessEntityContact_BusinessEntity_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[BusinessEntity](BusinessEntityID);
+ALTER TABLE [Person].[Person.BusinessEntityContact] ADD CONSTRAINT [FK_BusinessEntityContact_Person_PersonID] FOREIGN KEY (PersonID) REFERENCES [Person].[Person](BusinessEntityID);
+ALTER TABLE [Person].[Person.BusinessEntityContact] ADD CONSTRAINT [FK_BusinessEntityContact_ContactType_ContactTypeID] FOREIGN KEY (ContactTypeID) REFERENCES [Person].[ContactType](ContactTypeID);
+ALTER TABLE [Person].[Person.BusinessEntityContact] ADD CONSTRAINT [DF_BusinessEntityContact_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.BusinessEntityContact] ADD CONSTRAINT [DF_BusinessEntityContact_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_BusinessEntityContact_ContactTypeID] ON [Person].[Person.BusinessEntityContact] ([ContactTypeID]);
+CREATE INDEX [IX_BusinessEntityContact_PersonID] ON [Person].[Person.BusinessEntityContact] ([PersonID]);
+CREATE UNIQUE INDEX [AK_BusinessEntityContact_rowguid] ON [Person].[Person.BusinessEntityContact] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.UnitMeasure] (
+  [UnitMeasureCode] nchar(6) NOT NULL,
+  [Name] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.UnitMeasure] ADD CONSTRAINT [PK_UnitMeasure_UnitMeasureCode] PRIMARY KEY ([UnitMeasureCode]);
+ALTER TABLE [Production].[Production.UnitMeasure] ADD CONSTRAINT [DF_UnitMeasure_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_UnitMeasure_Name] ON [Production].[Production.UnitMeasure] ([Name]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Purchasing].[Purchasing.Vendor] (
+  [BusinessEntityID] int NOT NULL,
+  [AccountNumber] AccountNumber NOT NULL,
+  [Name] Name NOT NULL,
+  [CreditRating] tinyint NOT NULL,
+  [PreferredVendorStatus] Flag NOT NULL,
+  [ActiveFlag] Flag NOT NULL,
+  [PurchasingWebServiceURL] nvarchar(2048) NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Purchasing].[Purchasing.Vendor] ADD CONSTRAINT [PK_Vendor_BusinessEntityID] PRIMARY KEY ([BusinessEntityID]);
+ALTER TABLE [Purchasing].[Purchasing.Vendor] ADD CONSTRAINT [FK_Vendor_BusinessEntity_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[BusinessEntity](BusinessEntityID);
+ALTER TABLE [Purchasing].[Purchasing.Vendor] ADD CONSTRAINT [DF_Vendor_PreferredVendorStatus] DEFAULT ((1)) FOR [PreferredVendorStatus];
+ALTER TABLE [Purchasing].[Purchasing.Vendor] ADD CONSTRAINT [DF_Vendor_ActiveFlag] DEFAULT ((1)) FOR [ActiveFlag];
+ALTER TABLE [Purchasing].[Purchasing.Vendor] ADD CONSTRAINT [DF_Vendor_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Purchasing].[Purchasing.Vendor] ADD CONSTRAINT [CK_Vendor_CreditRating] CHECK ([CreditRating]>=(1) AND [CreditRating]<=(5));
+CREATE UNIQUE INDEX [AK_Vendor_AccountNumber] ON [Purchasing].[Purchasing.Vendor] ([AccountNumber]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.ContactType] (
+  [ContactTypeID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.ContactType] ADD CONSTRAINT [PK_ContactType_ContactTypeID] PRIMARY KEY ([ContactTypeID]);
+ALTER TABLE [Person].[Person.ContactType] ADD CONSTRAINT [DF_ContactType_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_ContactType_Name] ON [Person].[Person.ContactType] ([Name]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.CountryRegionCurrency] (
+  [CountryRegionCode] nvarchar(6) NOT NULL,
+  [CurrencyCode] nchar(6) NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.CountryRegionCurrency] ADD CONSTRAINT [PK_CountryRegionCurrency_CountryRegionCode_CurrencyCode] PRIMARY KEY ([CountryRegionCode], [CurrencyCode]);
+ALTER TABLE [Sales].[Sales.CountryRegionCurrency] ADD CONSTRAINT [FK_CountryRegionCurrency_CountryRegion_CountryRegionCode] FOREIGN KEY (CountryRegionCode) REFERENCES [Person].[CountryRegion](CountryRegionCode);
+ALTER TABLE [Sales].[Sales.CountryRegionCurrency] ADD CONSTRAINT [FK_CountryRegionCurrency_Currency_CurrencyCode] FOREIGN KEY (CurrencyCode) REFERENCES [Sales].[Currency](CurrencyCode);
+ALTER TABLE [Sales].[Sales.CountryRegionCurrency] ADD CONSTRAINT [DF_CountryRegionCurrency_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_CountryRegionCurrency_CurrencyCode] ON [Sales].[Sales.CountryRegionCurrency] ([CurrencyCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.CountryRegion] (
+  [CountryRegionCode] nvarchar(6) NOT NULL,
+  [Name] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.CountryRegion] ADD CONSTRAINT [PK_CountryRegion_CountryRegionCode] PRIMARY KEY ([CountryRegionCode]);
+ALTER TABLE [Person].[Person.CountryRegion] ADD CONSTRAINT [DF_CountryRegion_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_CountryRegion_Name] ON [Person].[Person.CountryRegion] ([Name]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.WorkOrder] (
+  [WorkOrderID] int NOT NULL IDENTITY(1,1),
+  [ProductID] int NOT NULL,
+  [OrderQty] int NOT NULL,
+  [StockedQty] int NOT NULL,
+  [ScrappedQty] smallint NOT NULL,
+  [StartDate] datetime NOT NULL,
+  [EndDate] datetime NULL,
+  [DueDate] datetime NOT NULL,
+  [ScrapReasonID] smallint NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.WorkOrder] ADD CONSTRAINT [PK_WorkOrder_WorkOrderID] PRIMARY KEY ([WorkOrderID]);
+ALTER TABLE [Production].[Production.WorkOrder] ADD CONSTRAINT [FK_WorkOrder_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Production].[Production.WorkOrder] ADD CONSTRAINT [FK_WorkOrder_ScrapReason_ScrapReasonID] FOREIGN KEY (ScrapReasonID) REFERENCES [Production].[ScrapReason](ScrapReasonID);
+ALTER TABLE [Production].[Production.WorkOrder] ADD CONSTRAINT [DF_WorkOrder_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.WorkOrder] ADD CONSTRAINT [CK_WorkOrder_OrderQty] CHECK ([OrderQty]>(0));
+ALTER TABLE [Production].[Production.WorkOrder] ADD CONSTRAINT [CK_WorkOrder_ScrappedQty] CHECK ([ScrappedQty]>=(0));
+ALTER TABLE [Production].[Production.WorkOrder] ADD CONSTRAINT [CK_WorkOrder_EndDate] CHECK ([EndDate]>=[StartDate] OR [EndDate] IS NULL);
+CREATE INDEX [IX_WorkOrder_ProductID] ON [Production].[Production.WorkOrder] ([ProductID]);
+CREATE INDEX [IX_WorkOrder_ScrapReasonID] ON [Production].[Production.WorkOrder] ([ScrapReasonID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] (
+  [PurchaseOrderID] int NOT NULL,
+  [PurchaseOrderDetailID] int NOT NULL IDENTITY(1,1),
+  [DueDate] datetime NOT NULL,
+  [OrderQty] smallint NOT NULL,
+  [ProductID] int NOT NULL,
+  [UnitPrice] money NOT NULL,
+  [LineTotal] money NOT NULL,
+  [ReceivedQty] decimal(8,2) NOT NULL,
+  [RejectedQty] decimal(8,2) NOT NULL,
+  [StockedQty] decimal(9,2) NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] ADD CONSTRAINT [PK_PurchaseOrderDetail_PurchaseOrderID_PurchaseOrderDetailID] PRIMARY KEY ([PurchaseOrderID], [PurchaseOrderDetailID]);
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] ADD CONSTRAINT [FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID] FOREIGN KEY (PurchaseOrderID) REFERENCES [Purchasing].[PurchaseOrderHeader](PurchaseOrderID);
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] ADD CONSTRAINT [FK_PurchaseOrderDetail_Product_ProductID] FOREIGN KEY (ProductID) REFERENCES [Production].[Product](ProductID);
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] ADD CONSTRAINT [DF_PurchaseOrderDetail_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] ADD CONSTRAINT [CK_PurchaseOrderDetail_OrderQty] CHECK ([OrderQty]>(0));
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] ADD CONSTRAINT [CK_PurchaseOrderDetail_UnitPrice] CHECK ([UnitPrice]>=(0.00));
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] ADD CONSTRAINT [CK_PurchaseOrderDetail_ReceivedQty] CHECK ([ReceivedQty]>=(0.00));
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderDetail] ADD CONSTRAINT [CK_PurchaseOrderDetail_RejectedQty] CHECK ([RejectedQty]>=(0.00));
+CREATE INDEX [IX_PurchaseOrderDetail_ProductID] ON [Purchasing].[Purchasing.PurchaseOrderDetail] ([ProductID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.CreditCard] (
+  [CreditCardID] int NOT NULL IDENTITY(1,1),
+  [CardType] nvarchar(100) NOT NULL,
+  [CardNumber] nvarchar(50) NOT NULL,
+  [ExpMonth] tinyint NOT NULL,
+  [ExpYear] smallint NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.CreditCard] ADD CONSTRAINT [PK_CreditCard_CreditCardID] PRIMARY KEY ([CreditCardID]);
+ALTER TABLE [Sales].[Sales.CreditCard] ADD CONSTRAINT [DF_CreditCard_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_CreditCard_CardNumber] ON [Sales].[Sales.CreditCard] ([CardNumber]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.Culture] (
+  [CultureID] nchar(12) NOT NULL,
+  [Name] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.Culture] ADD CONSTRAINT [PK_Culture_CultureID] PRIMARY KEY ([CultureID]);
+ALTER TABLE [Production].[Production.Culture] ADD CONSTRAINT [DF_Culture_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_Culture_Name] ON [Production].[Production.Culture] ([Name]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.WorkOrderRouting] (
+  [WorkOrderID] int NOT NULL,
+  [ProductID] int NOT NULL,
+  [OperationSequence] smallint NOT NULL,
+  [LocationID] smallint NOT NULL,
+  [ScheduledStartDate] datetime NOT NULL,
+  [ScheduledEndDate] datetime NOT NULL,
+  [ActualStartDate] datetime NULL,
+  [ActualEndDate] datetime NULL,
+  [ActualResourceHrs] decimal(9,4) NULL,
+  [PlannedCost] money NOT NULL,
+  [ActualCost] money NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [PK_WorkOrderRouting_WorkOrderID_ProductID_OperationSequence] PRIMARY KEY ([WorkOrderID], [ProductID], [OperationSequence]);
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [FK_WorkOrderRouting_WorkOrder_WorkOrderID] FOREIGN KEY (WorkOrderID) REFERENCES [Production].[WorkOrder](WorkOrderID);
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [FK_WorkOrderRouting_Location_LocationID] FOREIGN KEY (LocationID) REFERENCES [Production].[Location](LocationID);
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [DF_WorkOrderRouting_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [CK_WorkOrderRouting_ScheduledEndDate] CHECK ([ScheduledEndDate]>=[ScheduledStartDate]);
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [CK_WorkOrderRouting_ActualEndDate] CHECK ([ActualEndDate]>=[ActualStartDate] OR [ActualEndDate] IS NULL OR [ActualStartDate] IS NULL);
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [CK_WorkOrderRouting_ActualResourceHrs] CHECK ([ActualResourceHrs]>=(0.0000));
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [CK_WorkOrderRouting_PlannedCost] CHECK ([PlannedCost]>(0.00));
+ALTER TABLE [Production].[Production.WorkOrderRouting] ADD CONSTRAINT [CK_WorkOrderRouting_ActualCost] CHECK ([ActualCost]>(0.00));
+CREATE INDEX [IX_WorkOrderRouting_ProductID] ON [Production].[Production.WorkOrderRouting] ([ProductID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.Currency] (
+  [CurrencyCode] nchar(6) NOT NULL,
+  [Name] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.Currency] ADD CONSTRAINT [PK_Currency_CurrencyCode] PRIMARY KEY ([CurrencyCode]);
+ALTER TABLE [Sales].[Sales.Currency] ADD CONSTRAINT [DF_Currency_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_Currency_Name] ON [Sales].[Sales.Currency] ([Name]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] (
+  [PurchaseOrderID] int NOT NULL IDENTITY(1,1),
+  [RevisionNumber] tinyint NOT NULL,
+  [Status] tinyint NOT NULL,
+  [EmployeeID] int NOT NULL,
+  [VendorID] int NOT NULL,
+  [ShipMethodID] int NOT NULL,
+  [OrderDate] datetime NOT NULL,
+  [ShipDate] datetime NULL,
+  [SubTotal] money NOT NULL,
+  [TaxAmt] money NOT NULL,
+  [Freight] money NOT NULL,
+  [TotalDue] money NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [PK_PurchaseOrderHeader_PurchaseOrderID] PRIMARY KEY ([PurchaseOrderID]);
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [FK_PurchaseOrderHeader_Employee_EmployeeID] FOREIGN KEY (EmployeeID) REFERENCES [HumanResources].[Employee](BusinessEntityID);
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [FK_PurchaseOrderHeader_Vendor_VendorID] FOREIGN KEY (VendorID) REFERENCES [Purchasing].[Vendor](BusinessEntityID);
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [FK_PurchaseOrderHeader_ShipMethod_ShipMethodID] FOREIGN KEY (ShipMethodID) REFERENCES [Purchasing].[ShipMethod](ShipMethodID);
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [DF_PurchaseOrderHeader_RevisionNumber] DEFAULT ((0)) FOR [RevisionNumber];
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [DF_PurchaseOrderHeader_Status] DEFAULT ((1)) FOR [Status];
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [DF_PurchaseOrderHeader_OrderDate] DEFAULT (getdate()) FOR [OrderDate];
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [DF_PurchaseOrderHeader_SubTotal] DEFAULT ((0.00)) FOR [SubTotal];
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [DF_PurchaseOrderHeader_TaxAmt] DEFAULT ((0.00)) FOR [TaxAmt];
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [DF_PurchaseOrderHeader_Freight] DEFAULT ((0.00)) FOR [Freight];
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [DF_PurchaseOrderHeader_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [CK_PurchaseOrderHeader_Status] CHECK ([Status]>=(1) AND [Status]<=(4));
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [CK_PurchaseOrderHeader_ShipDate] CHECK ([ShipDate]>=[OrderDate] OR [ShipDate] IS NULL);
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [CK_PurchaseOrderHeader_SubTotal] CHECK ([SubTotal]>=(0.00));
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [CK_PurchaseOrderHeader_TaxAmt] CHECK ([TaxAmt]>=(0.00));
+ALTER TABLE [Purchasing].[Purchasing.PurchaseOrderHeader] ADD CONSTRAINT [CK_PurchaseOrderHeader_Freight] CHECK ([Freight]>=(0.00));
+CREATE INDEX [IX_PurchaseOrderHeader_EmployeeID] ON [Purchasing].[Purchasing.PurchaseOrderHeader] ([EmployeeID]);
+CREATE INDEX [IX_PurchaseOrderHeader_VendorID] ON [Purchasing].[Purchasing.PurchaseOrderHeader] ([VendorID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.CurrencyRate] (
+  [CurrencyRateID] int NOT NULL IDENTITY(1,1),
+  [CurrencyRateDate] datetime NOT NULL,
+  [FromCurrencyCode] nchar(6) NOT NULL,
+  [ToCurrencyCode] nchar(6) NOT NULL,
+  [AverageRate] money NOT NULL,
+  [EndOfDayRate] money NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.CurrencyRate] ADD CONSTRAINT [PK_CurrencyRate_CurrencyRateID] PRIMARY KEY ([CurrencyRateID]);
+ALTER TABLE [Sales].[Sales.CurrencyRate] ADD CONSTRAINT [FK_CurrencyRate_Currency_FromCurrencyCode] FOREIGN KEY (FromCurrencyCode) REFERENCES [Sales].[Currency](CurrencyCode);
+ALTER TABLE [Sales].[Sales.CurrencyRate] ADD CONSTRAINT [FK_CurrencyRate_Currency_ToCurrencyCode] FOREIGN KEY (ToCurrencyCode) REFERENCES [Sales].[Currency](CurrencyCode);
+ALTER TABLE [Sales].[Sales.CurrencyRate] ADD CONSTRAINT [DF_CurrencyRate_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_CurrencyRate_CurrencyRateDate_FromCurrencyCode_ToCurrencyCode] ON [Sales].[Sales.CurrencyRate] ([CurrencyRateDate], [FromCurrencyCode], [ToCurrencyCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.Customer] (
+  [CustomerID] int NOT NULL IDENTITY(1,1),
+  [PersonID] int NULL,
+  [StoreID] int NULL,
+  [TerritoryID] int NULL,
+  [AccountNumber] varchar(10) NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.Customer] ADD CONSTRAINT [PK_Customer_CustomerID] PRIMARY KEY ([CustomerID]);
+ALTER TABLE [Sales].[Sales.Customer] ADD CONSTRAINT [FK_Customer_Person_PersonID] FOREIGN KEY (PersonID) REFERENCES [Person].[Person](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.Customer] ADD CONSTRAINT [FK_Customer_Store_StoreID] FOREIGN KEY (StoreID) REFERENCES [Sales].[Store](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.Customer] ADD CONSTRAINT [FK_Customer_SalesTerritory_TerritoryID] FOREIGN KEY (TerritoryID) REFERENCES [Sales].[SalesTerritory](TerritoryID);
+ALTER TABLE [Sales].[Sales.Customer] ADD CONSTRAINT [DF_Customer_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.Customer] ADD CONSTRAINT [DF_Customer_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_Customer_TerritoryID] ON [Sales].[Sales.Customer] ([TerritoryID]);
+CREATE UNIQUE INDEX [AK_Customer_AccountNumber] ON [Sales].[Sales.Customer] ([AccountNumber]);
+CREATE UNIQUE INDEX [AK_Customer_rowguid] ON [Sales].[Sales.Customer] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [HumanResources].[HumanResources.Department] (
+  [DepartmentID] smallint NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [GroupName] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [HumanResources].[HumanResources.Department] ADD CONSTRAINT [PK_Department_DepartmentID] PRIMARY KEY ([DepartmentID]);
+ALTER TABLE [HumanResources].[HumanResources.Department] ADD CONSTRAINT [DF_Department_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE UNIQUE INDEX [AK_Department_Name] ON [HumanResources].[HumanResources.Department] ([Name]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.Document] (
+  [DocumentNode] hierarchyid NOT NULL,
+  [DocumentLevel] smallint NULL,
+  [Title] nvarchar(100) NOT NULL,
+  [Owner] int NOT NULL,
+  [FolderFlag] bit NOT NULL,
+  [FileName] nvarchar(800) NOT NULL,
+  [FileExtension] nvarchar(16) NOT NULL,
+  [Revision] nchar(10) NOT NULL,
+  [ChangeNumber] int NOT NULL,
+  [Status] tinyint NOT NULL,
+  [DocumentSummary] nvarchar(MAX) NULL,
+  [Document] varbinary NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.Document] ADD CONSTRAINT [PK_Document_DocumentNode] PRIMARY KEY ([DocumentNode]);
+ALTER TABLE [Production].[Production.Document] ADD CONSTRAINT [FK_Document_Employee_Owner] FOREIGN KEY (Owner) REFERENCES [HumanResources].[Employee](BusinessEntityID);
+ALTER TABLE [Production].[Production.Document] ADD CONSTRAINT [DF_Document_FolderFlag] DEFAULT ((0)) FOR [FolderFlag];
+ALTER TABLE [Production].[Production.Document] ADD CONSTRAINT [DF_Document_ChangeNumber] DEFAULT ((0)) FOR [ChangeNumber];
+ALTER TABLE [Production].[Production.Document] ADD CONSTRAINT [DF_Document_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Production].[Production.Document] ADD CONSTRAINT [DF_Document_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.Document] ADD CONSTRAINT [CK_Document_Status] CHECK ([Status]>=(1) AND [Status]<=(3));
+CREATE INDEX [IX_Document_FileName_Revision] ON [Production].[Production.Document] ([FileName], [Revision]);
+CREATE UNIQUE INDEX [AK_Document_DocumentLevel_DocumentNode] ON [Production].[Production.Document] ([DocumentLevel], [DocumentNode]);
+CREATE UNIQUE INDEX [AK_Document_rowguid] ON [Production].[Production.Document] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesOrderDetail] (
+  [SalesOrderID] int NOT NULL,
+  [SalesOrderDetailID] int NOT NULL IDENTITY(1,1),
+  [CarrierTrackingNumber] nvarchar(50) NULL,
+  [OrderQty] smallint NOT NULL,
+  [ProductID] int NOT NULL,
+  [SpecialOfferID] int NOT NULL,
+  [UnitPrice] money NOT NULL,
+  [UnitPriceDiscount] money NOT NULL,
+  [LineTotal] numeric(38,6) NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [PK_SalesOrderDetail_SalesOrderID_SalesOrderDetailID] PRIMARY KEY ([SalesOrderID], [SalesOrderDetailID]);
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [FK_SalesOrderDetail_SalesOrderHeader_SalesOrderID] FOREIGN KEY (SalesOrderID) REFERENCES [Sales].[SalesOrderHeader](SalesOrderID);
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID] FOREIGN KEY (ProductID) REFERENCES [Sales].[SpecialOfferProduct](ProductID);
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID] FOREIGN KEY (SpecialOfferID) REFERENCES [Sales].[SpecialOfferProduct](SpecialOfferID);
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [DF_SalesOrderDetail_UnitPriceDiscount] DEFAULT ((0.0)) FOR [UnitPriceDiscount];
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [DF_SalesOrderDetail_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [DF_SalesOrderDetail_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [CK_SalesOrderDetail_OrderQty] CHECK ([OrderQty]>(0));
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [CK_SalesOrderDetail_UnitPrice] CHECK ([UnitPrice]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesOrderDetail] ADD CONSTRAINT [CK_SalesOrderDetail_UnitPriceDiscount] CHECK ([UnitPriceDiscount]>=(0.00));
+CREATE INDEX [IX_SalesOrderDetail_ProductID] ON [Sales].[Sales.SalesOrderDetail] ([ProductID]);
+CREATE UNIQUE INDEX [AK_SalesOrderDetail_rowguid] ON [Sales].[Sales.SalesOrderDetail] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.EmailAddress] (
+  [BusinessEntityID] int NOT NULL,
+  [EmailAddressID] int NOT NULL IDENTITY(1,1),
+  [EmailAddress] nvarchar(100) NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.EmailAddress] ADD CONSTRAINT [PK_EmailAddress_BusinessEntityID_EmailAddressID] PRIMARY KEY ([BusinessEntityID], [EmailAddressID]);
+ALTER TABLE [Person].[Person.EmailAddress] ADD CONSTRAINT [FK_EmailAddress_Person_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[Person](BusinessEntityID);
+ALTER TABLE [Person].[Person.EmailAddress] ADD CONSTRAINT [DF_EmailAddress_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.EmailAddress] ADD CONSTRAINT [DF_EmailAddress_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_EmailAddress_EmailAddress] ON [Person].[Person.EmailAddress] ([EmailAddress]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [HumanResources].[HumanResources.Employee] (
+  [BusinessEntityID] int NOT NULL,
+  [NationalIDNumber] nvarchar(30) NOT NULL,
+  [LoginID] nvarchar(512) NOT NULL,
+  [OrganizationNode] hierarchyid NULL,
+  [OrganizationLevel] smallint NULL,
+  [JobTitle] nvarchar(100) NOT NULL,
+  [BirthDate] date NOT NULL,
+  [MaritalStatus] nchar(2) NOT NULL,
+  [Gender] nchar(2) NOT NULL,
+  [HireDate] date NOT NULL,
+  [SalariedFlag] Flag NOT NULL,
+  [VacationHours] smallint NOT NULL,
+  [SickLeaveHours] smallint NOT NULL,
+  [CurrentFlag] Flag NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [PK_Employee_BusinessEntityID] PRIMARY KEY ([BusinessEntityID]);
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [FK_Employee_Person_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[Person](BusinessEntityID);
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [DF_Employee_SalariedFlag] DEFAULT ((1)) FOR [SalariedFlag];
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [DF_Employee_VacationHours] DEFAULT ((0)) FOR [VacationHours];
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [DF_Employee_SickLeaveHours] DEFAULT ((0)) FOR [SickLeaveHours];
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [DF_Employee_CurrentFlag] DEFAULT ((1)) FOR [CurrentFlag];
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [DF_Employee_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [DF_Employee_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [CK_Employee_BirthDate] CHECK ([BirthDate]>='1930-01-01' AND [BirthDate]<=dateadd(year,(-18),getdate()));
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [CK_Employee_MaritalStatus] CHECK (upper([MaritalStatus])='S' OR upper([MaritalStatus])='M');
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [CK_Employee_HireDate] CHECK ([HireDate]>='1996-07-01' AND [HireDate]<=dateadd(day,(1),getdate()));
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [CK_Employee_Gender] CHECK (upper([Gender])='F' OR upper([Gender])='M');
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [CK_Employee_VacationHours] CHECK ([VacationHours]>=(-40) AND [VacationHours]<=(240));
+ALTER TABLE [HumanResources].[HumanResources.Employee] ADD CONSTRAINT [CK_Employee_SickLeaveHours] CHECK ([SickLeaveHours]>=(0) AND [SickLeaveHours]<=(120));
+CREATE INDEX [IX_Employee_OrganizationLevel_OrganizationNode] ON [HumanResources].[HumanResources.Employee] ([OrganizationLevel], [OrganizationNode]);
+CREATE INDEX [IX_Employee_OrganizationNode] ON [HumanResources].[HumanResources.Employee] ([OrganizationNode]);
+CREATE UNIQUE INDEX [AK_Employee_LoginID] ON [HumanResources].[HumanResources.Employee] ([LoginID]);
+CREATE UNIQUE INDEX [AK_Employee_NationalIDNumber] ON [HumanResources].[HumanResources.Employee] ([NationalIDNumber]);
+CREATE UNIQUE INDEX [AK_Employee_rowguid] ON [HumanResources].[HumanResources.Employee] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesOrderHeader] (
+  [SalesOrderID] int NOT NULL IDENTITY(1,1),
+  [RevisionNumber] tinyint NOT NULL,
+  [OrderDate] datetime NOT NULL,
+  [DueDate] datetime NOT NULL,
+  [ShipDate] datetime NULL,
+  [Status] tinyint NOT NULL,
+  [OnlineOrderFlag] Flag NOT NULL,
+  [SalesOrderNumber] nvarchar(50) NOT NULL,
+  [PurchaseOrderNumber] OrderNumber NULL,
+  [AccountNumber] AccountNumber NULL,
+  [CustomerID] int NOT NULL,
+  [SalesPersonID] int NULL,
+  [TerritoryID] int NULL,
+  [BillToAddressID] int NOT NULL,
+  [ShipToAddressID] int NOT NULL,
+  [ShipMethodID] int NOT NULL,
+  [CreditCardID] int NULL,
+  [CreditCardApprovalCode] varchar(15) NULL,
+  [CurrencyRateID] int NULL,
+  [SubTotal] money NOT NULL,
+  [TaxAmt] money NOT NULL,
+  [Freight] money NOT NULL,
+  [TotalDue] money NOT NULL,
+  [Comment] nvarchar(256) NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [PK_SalesOrderHeader_SalesOrderID] PRIMARY KEY ([SalesOrderID]);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [FK_SalesOrderHeader_Customer_CustomerID] FOREIGN KEY (CustomerID) REFERENCES [Sales].[Customer](CustomerID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [FK_SalesOrderHeader_SalesPerson_SalesPersonID] FOREIGN KEY (SalesPersonID) REFERENCES [Sales].[SalesPerson](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [FK_SalesOrderHeader_SalesTerritory_TerritoryID] FOREIGN KEY (TerritoryID) REFERENCES [Sales].[SalesTerritory](TerritoryID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [FK_SalesOrderHeader_Address_BillToAddressID] FOREIGN KEY (BillToAddressID) REFERENCES [Person].[Address](AddressID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [FK_SalesOrderHeader_Address_ShipToAddressID] FOREIGN KEY (ShipToAddressID) REFERENCES [Person].[Address](AddressID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [FK_SalesOrderHeader_ShipMethod_ShipMethodID] FOREIGN KEY (ShipMethodID) REFERENCES [Purchasing].[ShipMethod](ShipMethodID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [FK_SalesOrderHeader_CreditCard_CreditCardID] FOREIGN KEY (CreditCardID) REFERENCES [Sales].[CreditCard](CreditCardID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [FK_SalesOrderHeader_CurrencyRate_CurrencyRateID] FOREIGN KEY (CurrencyRateID) REFERENCES [Sales].[CurrencyRate](CurrencyRateID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_RevisionNumber] DEFAULT ((0)) FOR [RevisionNumber];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_OrderDate] DEFAULT (getdate()) FOR [OrderDate];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_Status] DEFAULT ((1)) FOR [Status];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_OnlineOrderFlag] DEFAULT ((1)) FOR [OnlineOrderFlag];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_SubTotal] DEFAULT ((0.00)) FOR [SubTotal];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_TaxAmt] DEFAULT ((0.00)) FOR [TaxAmt];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_Freight] DEFAULT ((0.00)) FOR [Freight];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [DF_SalesOrderHeader_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [CK_SalesOrderHeader_Status] CHECK ([Status]>=(0) AND [Status]<=(8));
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [CK_SalesOrderHeader_DueDate] CHECK ([DueDate]>=[OrderDate]);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [CK_SalesOrderHeader_ShipDate] CHECK ([ShipDate]>=[OrderDate] OR [ShipDate] IS NULL);
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [CK_SalesOrderHeader_SubTotal] CHECK ([SubTotal]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [CK_SalesOrderHeader_TaxAmt] CHECK ([TaxAmt]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesOrderHeader] ADD CONSTRAINT [CK_SalesOrderHeader_Freight] CHECK ([Freight]>=(0.00));
+CREATE INDEX [IX_SalesOrderHeader_CustomerID] ON [Sales].[Sales.SalesOrderHeader] ([CustomerID]);
+CREATE INDEX [IX_SalesOrderHeader_SalesPersonID] ON [Sales].[Sales.SalesOrderHeader] ([SalesPersonID]);
+CREATE UNIQUE INDEX [AK_SalesOrderHeader_rowguid] ON [Sales].[Sales.SalesOrderHeader] ([rowguid]);
+CREATE UNIQUE INDEX [AK_SalesOrderHeader_SalesOrderNumber] ON [Sales].[Sales.SalesOrderHeader] ([SalesOrderNumber]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [HumanResources].[HumanResources.EmployeeDepartmentHistory] (
+  [BusinessEntityID] int NOT NULL,
+  [DepartmentID] smallint NOT NULL,
+  [ShiftID] tinyint NOT NULL,
+  [StartDate] date NOT NULL,
+  [EndDate] date NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [HumanResources].[HumanResources.EmployeeDepartmentHistory] ADD CONSTRAINT [PK_EmployeeDepartmentHistory_BusinessEntityID_StartDate_DepartmentID] PRIMARY KEY ([BusinessEntityID], [DepartmentID], [ShiftID], [StartDate]);
+ALTER TABLE [HumanResources].[HumanResources.EmployeeDepartmentHistory] ADD CONSTRAINT [FK_EmployeeDepartmentHistory_Employee_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [HumanResources].[Employee](BusinessEntityID);
+ALTER TABLE [HumanResources].[HumanResources.EmployeeDepartmentHistory] ADD CONSTRAINT [FK_EmployeeDepartmentHistory_Department_DepartmentID] FOREIGN KEY (DepartmentID) REFERENCES [HumanResources].[Department](DepartmentID);
+ALTER TABLE [HumanResources].[HumanResources.EmployeeDepartmentHistory] ADD CONSTRAINT [FK_EmployeeDepartmentHistory_Shift_ShiftID] FOREIGN KEY (ShiftID) REFERENCES [HumanResources].[Shift](ShiftID);
+ALTER TABLE [HumanResources].[HumanResources.EmployeeDepartmentHistory] ADD CONSTRAINT [DF_EmployeeDepartmentHistory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [HumanResources].[HumanResources.EmployeeDepartmentHistory] ADD CONSTRAINT [CK_EmployeeDepartmentHistory_EndDate] CHECK ([EndDate]>=[StartDate] OR [EndDate] IS NULL);
+CREATE INDEX [IX_EmployeeDepartmentHistory_DepartmentID] ON [HumanResources].[HumanResources.EmployeeDepartmentHistory] ([DepartmentID]);
+CREATE INDEX [IX_EmployeeDepartmentHistory_ShiftID] ON [HumanResources].[HumanResources.EmployeeDepartmentHistory] ([ShiftID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [HumanResources].[HumanResources.EmployeePayHistory] (
+  [BusinessEntityID] int NOT NULL,
+  [RateChangeDate] datetime NOT NULL,
+  [Rate] money NOT NULL,
+  [PayFrequency] tinyint NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [HumanResources].[HumanResources.EmployeePayHistory] ADD CONSTRAINT [PK_EmployeePayHistory_BusinessEntityID_RateChangeDate] PRIMARY KEY ([BusinessEntityID], [RateChangeDate]);
+ALTER TABLE [HumanResources].[HumanResources.EmployeePayHistory] ADD CONSTRAINT [FK_EmployeePayHistory_Employee_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [HumanResources].[Employee](BusinessEntityID);
+ALTER TABLE [HumanResources].[HumanResources.EmployeePayHistory] ADD CONSTRAINT [DF_EmployeePayHistory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [HumanResources].[HumanResources.EmployeePayHistory] ADD CONSTRAINT [CK_EmployeePayHistory_PayFrequency] CHECK ([PayFrequency]=(2) OR [PayFrequency]=(1));
+ALTER TABLE [HumanResources].[HumanResources.EmployeePayHistory] ADD CONSTRAINT [CK_EmployeePayHistory_Rate] CHECK ([Rate]>=(6.50) AND [Rate]<=(200.00));
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesOrderHeaderSalesReason] (
+  [SalesOrderID] int NOT NULL,
+  [SalesReasonID] int NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesOrderHeaderSalesReason] ADD CONSTRAINT [PK_SalesOrderHeaderSalesReason_SalesOrderID_SalesReasonID] PRIMARY KEY ([SalesOrderID], [SalesReasonID]);
+ALTER TABLE [Sales].[Sales.SalesOrderHeaderSalesReason] ADD CONSTRAINT [FK_SalesOrderHeaderSalesReason_SalesOrderHeader_SalesOrderID] FOREIGN KEY (SalesOrderID) REFERENCES [Sales].[SalesOrderHeader](SalesOrderID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeaderSalesReason] ADD CONSTRAINT [FK_SalesOrderHeaderSalesReason_SalesReason_SalesReasonID] FOREIGN KEY (SalesReasonID) REFERENCES [Sales].[SalesReason](SalesReasonID);
+ALTER TABLE [Sales].[Sales.SalesOrderHeaderSalesReason] ADD CONSTRAINT [DF_SalesOrderHeaderSalesReason_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesPerson] (
+  [BusinessEntityID] int NOT NULL,
+  [TerritoryID] int NULL,
+  [SalesQuota] money NULL,
+  [Bonus] money NOT NULL,
+  [CommissionPct] smallmoney NOT NULL,
+  [SalesYTD] money NOT NULL,
+  [SalesLastYear] money NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [PK_SalesPerson_BusinessEntityID] PRIMARY KEY ([BusinessEntityID]);
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [FK_SalesPerson_Employee_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [HumanResources].[Employee](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [FK_SalesPerson_SalesTerritory_TerritoryID] FOREIGN KEY (TerritoryID) REFERENCES [Sales].[SalesTerritory](TerritoryID);
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [DF_SalesPerson_Bonus] DEFAULT ((0.00)) FOR [Bonus];
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [DF_SalesPerson_CommissionPct] DEFAULT ((0.00)) FOR [CommissionPct];
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [DF_SalesPerson_SalesYTD] DEFAULT ((0.00)) FOR [SalesYTD];
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [DF_SalesPerson_SalesLastYear] DEFAULT ((0.00)) FOR [SalesLastYear];
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [DF_SalesPerson_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [DF_SalesPerson_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [CK_SalesPerson_SalesQuota] CHECK ([SalesQuota]>(0.00));
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [CK_SalesPerson_Bonus] CHECK ([Bonus]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [CK_SalesPerson_CommissionPct] CHECK ([CommissionPct]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [CK_SalesPerson_SalesYTD] CHECK ([SalesYTD]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesPerson] ADD CONSTRAINT [CK_SalesPerson_SalesLastYear] CHECK ([SalesLastYear]>=(0.00));
+CREATE UNIQUE INDEX [AK_SalesPerson_rowguid] ON [Sales].[Sales.SalesPerson] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.Illustration] (
+  [IllustrationID] int NOT NULL IDENTITY(1,1),
+  [Diagram] xml NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.Illustration] ADD CONSTRAINT [PK_Illustration_IllustrationID] PRIMARY KEY ([IllustrationID]);
+ALTER TABLE [Production].[Production.Illustration] ADD CONSTRAINT [DF_Illustration_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [HumanResources].[HumanResources.JobCandidate] (
+  [JobCandidateID] int NOT NULL IDENTITY(1,1),
+  [BusinessEntityID] int NULL,
+  [Resume] xml NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [HumanResources].[HumanResources.JobCandidate] ADD CONSTRAINT [PK_JobCandidate_JobCandidateID] PRIMARY KEY ([JobCandidateID]);
+ALTER TABLE [HumanResources].[HumanResources.JobCandidate] ADD CONSTRAINT [FK_JobCandidate_Employee_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [HumanResources].[Employee](BusinessEntityID);
+ALTER TABLE [HumanResources].[HumanResources.JobCandidate] ADD CONSTRAINT [DF_JobCandidate_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_JobCandidate_BusinessEntityID] ON [HumanResources].[HumanResources.JobCandidate] ([BusinessEntityID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.Location] (
+  [LocationID] smallint NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [CostRate] smallmoney NOT NULL,
+  [Availability] decimal(8,2) NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.Location] ADD CONSTRAINT [PK_Location_LocationID] PRIMARY KEY ([LocationID]);
+ALTER TABLE [Production].[Production.Location] ADD CONSTRAINT [DF_Location_CostRate] DEFAULT ((0.00)) FOR [CostRate];
+ALTER TABLE [Production].[Production.Location] ADD CONSTRAINT [DF_Location_Availability] DEFAULT ((0.00)) FOR [Availability];
+ALTER TABLE [Production].[Production.Location] ADD CONSTRAINT [DF_Location_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.Location] ADD CONSTRAINT [CK_Location_CostRate] CHECK ([CostRate]>=(0.00));
+ALTER TABLE [Production].[Production.Location] ADD CONSTRAINT [CK_Location_Availability] CHECK ([Availability]>=(0.00));
+CREATE UNIQUE INDEX [AK_Location_Name] ON [Production].[Production.Location] ([Name]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.Password] (
+  [BusinessEntityID] int NOT NULL,
+  [PasswordHash] varchar(128) NOT NULL,
+  [PasswordSalt] varchar(10) NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.Password] ADD CONSTRAINT [PK_Password_BusinessEntityID] PRIMARY KEY ([BusinessEntityID]);
+ALTER TABLE [Person].[Person.Password] ADD CONSTRAINT [FK_Password_Person_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[Person](BusinessEntityID);
+ALTER TABLE [Person].[Person.Password] ADD CONSTRAINT [DF_Password_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.Password] ADD CONSTRAINT [DF_Password_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesPersonQuotaHistory] (
+  [BusinessEntityID] int NOT NULL,
+  [QuotaDate] datetime NOT NULL,
+  [SalesQuota] money NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesPersonQuotaHistory] ADD CONSTRAINT [PK_SalesPersonQuotaHistory_BusinessEntityID_QuotaDate] PRIMARY KEY ([BusinessEntityID], [QuotaDate]);
+ALTER TABLE [Sales].[Sales.SalesPersonQuotaHistory] ADD CONSTRAINT [FK_SalesPersonQuotaHistory_SalesPerson_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Sales].[SalesPerson](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.SalesPersonQuotaHistory] ADD CONSTRAINT [DF_SalesPersonQuotaHistory_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SalesPersonQuotaHistory] ADD CONSTRAINT [DF_SalesPersonQuotaHistory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.SalesPersonQuotaHistory] ADD CONSTRAINT [CK_SalesPersonQuotaHistory_SalesQuota] CHECK ([SalesQuota]>(0.00));
+CREATE UNIQUE INDEX [AK_SalesPersonQuotaHistory_rowguid] ON [Sales].[Sales.SalesPersonQuotaHistory] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.Person] (
+  [BusinessEntityID] int NOT NULL,
+  [PersonType] nchar(4) NOT NULL,
+  [NameStyle] NameStyle NOT NULL,
+  [Title] nvarchar(16) NULL,
+  [FirstName] Name NOT NULL,
+  [MiddleName] Name NULL,
+  [LastName] Name NOT NULL,
+  [Suffix] nvarchar(20) NULL,
+  [EmailPromotion] int NOT NULL,
+  [AdditionalContactInfo] xml NULL,
+  [Demographics] xml NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.Person] ADD CONSTRAINT [PK_Person_BusinessEntityID] PRIMARY KEY ([BusinessEntityID]);
+ALTER TABLE [Person].[Person.Person] ADD CONSTRAINT [FK_Person_BusinessEntity_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[BusinessEntity](BusinessEntityID);
+ALTER TABLE [Person].[Person.Person] ADD CONSTRAINT [DF_Person_NameStyle] DEFAULT ((0)) FOR [NameStyle];
+ALTER TABLE [Person].[Person.Person] ADD CONSTRAINT [DF_Person_EmailPromotion] DEFAULT ((0)) FOR [EmailPromotion];
+ALTER TABLE [Person].[Person.Person] ADD CONSTRAINT [DF_Person_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Person].[Person.Person] ADD CONSTRAINT [DF_Person_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Person].[Person.Person] ADD CONSTRAINT [CK_Person_EmailPromotion] CHECK ([EmailPromotion]>=(0) AND [EmailPromotion]<=(2));
+ALTER TABLE [Person].[Person.Person] ADD CONSTRAINT [CK_Person_PersonType] CHECK ([PersonType] IS NULL OR (upper([PersonType])='GC' OR upper([PersonType])='SP' OR upper([PersonType])='EM' OR upper([PersonType])='IN' OR upper([PersonType])='VC' OR upper([PersonType])='SC'));
+CREATE INDEX [IX_Person_LastName_FirstName_MiddleName] ON [Person].[Person.Person] ([LastName], [FirstName], [MiddleName]);
+CREATE INDEX [PXML_Person_AddContact] ON [Person].[Person.Person] ([AdditionalContactInfo]);
+CREATE INDEX [PXML_Person_Demographics] ON [Person].[Person.Person] ([Demographics]);
+CREATE INDEX [XMLPATH_Person_Demographics] ON [Person].[Person.Person] ([Demographics]);
+CREATE INDEX [XMLPROPERTY_Person_Demographics] ON [Person].[Person.Person] ([Demographics]);
+CREATE INDEX [XMLVALUE_Person_Demographics] ON [Person].[Person.Person] ([Demographics]);
+CREATE UNIQUE INDEX [AK_Person_rowguid] ON [Person].[Person.Person] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesReason] (
+  [SalesReasonID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [ReasonType] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesReason] ADD CONSTRAINT [PK_SalesReason_SalesReasonID] PRIMARY KEY ([SalesReasonID]);
+ALTER TABLE [Sales].[Sales.SalesReason] ADD CONSTRAINT [DF_SalesReason_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesTaxRate] (
+  [SalesTaxRateID] int NOT NULL IDENTITY(1,1),
+  [StateProvinceID] int NOT NULL,
+  [TaxType] tinyint NOT NULL,
+  [TaxRate] smallmoney NOT NULL,
+  [Name] Name NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesTaxRate] ADD CONSTRAINT [PK_SalesTaxRate_SalesTaxRateID] PRIMARY KEY ([SalesTaxRateID]);
+ALTER TABLE [Sales].[Sales.SalesTaxRate] ADD CONSTRAINT [FK_SalesTaxRate_StateProvince_StateProvinceID] FOREIGN KEY (StateProvinceID) REFERENCES [Person].[StateProvince](StateProvinceID);
+ALTER TABLE [Sales].[Sales.SalesTaxRate] ADD CONSTRAINT [DF_SalesTaxRate_TaxRate] DEFAULT ((0.00)) FOR [TaxRate];
+ALTER TABLE [Sales].[Sales.SalesTaxRate] ADD CONSTRAINT [DF_SalesTaxRate_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SalesTaxRate] ADD CONSTRAINT [DF_SalesTaxRate_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.SalesTaxRate] ADD CONSTRAINT [CK_SalesTaxRate_TaxType] CHECK ([TaxType]>=(1) AND [TaxType]<=(3));
+CREATE UNIQUE INDEX [AK_SalesTaxRate_rowguid] ON [Sales].[Sales.SalesTaxRate] ([rowguid]);
+CREATE UNIQUE INDEX [AK_SalesTaxRate_StateProvinceID_TaxType] ON [Sales].[Sales.SalesTaxRate] ([StateProvinceID], [TaxType]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.PersonCreditCard] (
+  [BusinessEntityID] int NOT NULL,
+  [CreditCardID] int NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.PersonCreditCard] ADD CONSTRAINT [PK_PersonCreditCard_BusinessEntityID_CreditCardID] PRIMARY KEY ([BusinessEntityID], [CreditCardID]);
+ALTER TABLE [Sales].[Sales.PersonCreditCard] ADD CONSTRAINT [FK_PersonCreditCard_Person_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[Person](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.PersonCreditCard] ADD CONSTRAINT [FK_PersonCreditCard_CreditCard_CreditCardID] FOREIGN KEY (CreditCardID) REFERENCES [Sales].[CreditCard](CreditCardID);
+ALTER TABLE [Sales].[Sales.PersonCreditCard] ADD CONSTRAINT [DF_PersonCreditCard_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.PersonPhone] (
+  [BusinessEntityID] int NOT NULL,
+  [PhoneNumber] Phone NOT NULL,
+  [PhoneNumberTypeID] int NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.PersonPhone] ADD CONSTRAINT [PK_PersonPhone_BusinessEntityID_PhoneNumber_PhoneNumberTypeID] PRIMARY KEY ([BusinessEntityID], [PhoneNumber], [PhoneNumberTypeID]);
+ALTER TABLE [Person].[Person.PersonPhone] ADD CONSTRAINT [FK_PersonPhone_Person_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Person].[Person](BusinessEntityID);
+ALTER TABLE [Person].[Person.PersonPhone] ADD CONSTRAINT [FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID] FOREIGN KEY (PhoneNumberTypeID) REFERENCES [Person].[PhoneNumberType](PhoneNumberTypeID);
+ALTER TABLE [Person].[Person.PersonPhone] ADD CONSTRAINT [DF_PersonPhone_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE INDEX [IX_PersonPhone_PhoneNumber] ON [Person].[Person.PersonPhone] ([PhoneNumber]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesTerritory] (
+  [TerritoryID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [CountryRegionCode] nvarchar(6) NOT NULL,
+  [Group] nvarchar(100) NOT NULL,
+  [SalesYTD] money NOT NULL,
+  [SalesLastYear] money NOT NULL,
+  [CostYTD] money NOT NULL,
+  [CostLastYear] money NOT NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [PK_SalesTerritory_TerritoryID] PRIMARY KEY ([TerritoryID]);
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [FK_SalesTerritory_CountryRegion_CountryRegionCode] FOREIGN KEY (CountryRegionCode) REFERENCES [Person].[CountryRegion](CountryRegionCode);
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [DF_SalesTerritory_SalesYTD] DEFAULT ((0.00)) FOR [SalesYTD];
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [DF_SalesTerritory_SalesLastYear] DEFAULT ((0.00)) FOR [SalesLastYear];
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [DF_SalesTerritory_CostYTD] DEFAULT ((0.00)) FOR [CostYTD];
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [DF_SalesTerritory_CostLastYear] DEFAULT ((0.00)) FOR [CostLastYear];
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [DF_SalesTerritory_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [DF_SalesTerritory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [CK_SalesTerritory_SalesYTD] CHECK ([SalesYTD]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [CK_SalesTerritory_SalesLastYear] CHECK ([SalesLastYear]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [CK_SalesTerritory_CostYTD] CHECK ([CostYTD]>=(0.00));
+ALTER TABLE [Sales].[Sales.SalesTerritory] ADD CONSTRAINT [CK_SalesTerritory_CostLastYear] CHECK ([CostLastYear]>=(0.00));
+CREATE UNIQUE INDEX [AK_SalesTerritory_Name] ON [Sales].[Sales.SalesTerritory] ([Name]);
+CREATE UNIQUE INDEX [AK_SalesTerritory_rowguid] ON [Sales].[Sales.SalesTerritory] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Person].[Person.PhoneNumberType] (
+  [PhoneNumberTypeID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Person].[Person.PhoneNumberType] ADD CONSTRAINT [PK_PhoneNumberType_PhoneNumberTypeID] PRIMARY KEY ([PhoneNumberTypeID]);
+ALTER TABLE [Person].[Person.PhoneNumberType] ADD CONSTRAINT [DF_PhoneNumberType_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+---------------------------------------------------------------------------
+CREATE TABLE [Production].[Production.Product] (
+  [ProductID] int NOT NULL IDENTITY(1,1),
+  [Name] Name NOT NULL,
+  [ProductNumber] nvarchar(50) NOT NULL,
+  [MakeFlag] Flag NOT NULL,
+  [FinishedGoodsFlag] Flag NOT NULL,
+  [Color] nvarchar(30) NULL,
+  [SafetyStockLevel] smallint NOT NULL,
+  [ReorderPoint] smallint NOT NULL,
+  [StandardCost] money NOT NULL,
+  [ListPrice] money NOT NULL,
+  [Size] nvarchar(10) NULL,
+  [SizeUnitMeasureCode] nchar(6) NULL,
+  [WeightUnitMeasureCode] nchar(6) NULL,
+  [Weight] decimal(8,2) NULL,
+  [DaysToManufacture] int NOT NULL,
+  [ProductLine] nchar(4) NULL,
+  [Class] nchar(4) NULL,
+  [Style] nchar(4) NULL,
+  [ProductSubcategoryID] int NULL,
+  [ProductModelID] int NULL,
+  [SellStartDate] datetime NOT NULL,
+  [SellEndDate] datetime NULL,
+  [DiscontinuedDate] datetime NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [PK_Product_ProductID] PRIMARY KEY ([ProductID]);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [FK_Product_UnitMeasure_SizeUnitMeasureCode] FOREIGN KEY (SizeUnitMeasureCode) REFERENCES [Production].[UnitMeasure](UnitMeasureCode);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [FK_Product_UnitMeasure_WeightUnitMeasureCode] FOREIGN KEY (WeightUnitMeasureCode) REFERENCES [Production].[UnitMeasure](UnitMeasureCode);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [FK_Product_ProductSubcategory_ProductSubcategoryID] FOREIGN KEY (ProductSubcategoryID) REFERENCES [Production].[ProductSubcategory](ProductSubcategoryID);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [FK_Product_ProductModel_ProductModelID] FOREIGN KEY (ProductModelID) REFERENCES [Production].[ProductModel](ProductModelID);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [DF_Product_MakeFlag] DEFAULT ((1)) FOR [MakeFlag];
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [DF_Product_FinishedGoodsFlag] DEFAULT ((1)) FOR [FinishedGoodsFlag];
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [DF_Product_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [DF_Product_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_ProductLine] CHECK (upper([ProductLine])='R' OR upper([ProductLine])='M' OR upper([ProductLine])='T' OR upper([ProductLine])='S' OR [ProductLine] IS NULL);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_Class] CHECK (upper([Class])='H' OR upper([Class])='M' OR upper([Class])='L' OR [Class] IS NULL);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_Style] CHECK (upper([Style])='U' OR upper([Style])='M' OR upper([Style])='W' OR [Style] IS NULL);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_SellEndDate] CHECK ([SellEndDate]>=[SellStartDate] OR [SellEndDate] IS NULL);
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_SafetyStockLevel] CHECK ([SafetyStockLevel]>(0));
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_ReorderPoint] CHECK ([ReorderPoint]>(0));
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_StandardCost] CHECK ([StandardCost]>=(0.00));
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_ListPrice] CHECK ([ListPrice]>=(0.00));
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_Weight] CHECK ([Weight]>(0.00));
+ALTER TABLE [Production].[Production.Product] ADD CONSTRAINT [CK_Product_DaysToManufacture] CHECK ([DaysToManufacture]>=(0));
+CREATE UNIQUE INDEX [AK_Product_Name] ON [Production].[Production.Product] ([Name]);
+CREATE UNIQUE INDEX [AK_Product_ProductNumber] ON [Production].[Production.Product] ([ProductNumber]);
+CREATE UNIQUE INDEX [AK_Product_rowguid] ON [Production].[Production.Product] ([rowguid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [Sales].[Sales.SalesTerritoryHistory] (
+  [BusinessEntityID] int NOT NULL,
+  [TerritoryID] int NOT NULL,
+  [StartDate] datetime NOT NULL,
+  [EndDate] datetime NULL,
+  [rowguid] uniqueidentifier NOT NULL,
+  [ModifiedDate] datetime NOT NULL
+)
+ALTER TABLE [Sales].[Sales.SalesTerritoryHistory] ADD CONSTRAINT [PK_SalesTerritoryHistory_BusinessEntityID_StartDate_TerritoryID] PRIMARY KEY ([BusinessEntityID], [TerritoryID], [StartDate]);
+ALTER TABLE [Sales].[Sales.SalesTerritoryHistory] ADD CONSTRAINT [FK_SalesTerritoryHistory_SalesPerson_BusinessEntityID] FOREIGN KEY (BusinessEntityID) REFERENCES [Sales].[SalesPerson](BusinessEntityID);
+ALTER TABLE [Sales].[Sales.SalesTerritoryHistory] ADD CONSTRAINT [FK_SalesTerritoryHistory_SalesTerritory_TerritoryID] FOREIGN KEY (TerritoryID) REFERENCES [Sales].[SalesTerritory](TerritoryID);
+ALTER TABLE [Sales].[Sales.SalesTerritoryHistory] ADD CONSTRAINT [DF_SalesTerritoryHistory_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [Sales].[Sales.SalesTerritoryHistory] ADD CONSTRAINT [DF_SalesTerritoryHistory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [Sales].[Sales.SalesTerritoryHistory] ADD CONSTRAINT [CK_SalesTerritoryHistory_EndDate] CHECK ([EndDate]>=[StartDate] OR [EndDate] IS NULL);
+CREATE UNIQUE INDEX [AK_SalesTerritoryHistory_rowguid] ON [Sales].[Sales.SalesTerritoryHistory] ([rowguid]);
+
+---------------------------------------------------------------------------

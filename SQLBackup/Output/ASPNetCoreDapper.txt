@@ -1,0 +1,19 @@
+CREATE TABLE [dbo].[dbo.Employees] (
+  [Id] int NOT NULL IDENTITY(1,1),
+  [Name] varchar(255) NULL,
+  [Age] int NULL,
+  [Position] varchar(255) NULL,
+  [CompanyId] int NULL
+)
+ALTER TABLE [dbo].[dbo.Employees] ADD CONSTRAINT [PK__Persons__3214EC07F192D03A] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Companies] (
+  [Id] int NOT NULL IDENTITY(1,1),
+  [Name] varchar(255) NULL,
+  [Address] varchar(255) NULL,
+  [Country] varchar(255) NULL
+)
+ALTER TABLE [dbo].[dbo.Companies] ADD CONSTRAINT [PK__Company__3214EC0769C1BC3D] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------

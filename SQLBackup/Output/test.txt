@@ -1,0 +1,19 @@
+CREATE TABLE [dbo].[dbo.vehicles] (
+  [vehicle_id] varchar(50) NOT NULL,
+  [vin] varchar(17) NULL,
+  [make] varchar(100) NULL,
+  [model] varchar(100) NULL,
+  [year] int NULL,
+  [thumbnail_url] varchar(500) NULL
+)
+ALTER TABLE [dbo].[dbo.vehicles] ADD CONSTRAINT [PK__vehicles__F2947BC140053D02] PRIMARY KEY ([vehicle_id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.table3] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL
+)
+
+---------------------------------------------------------------------------

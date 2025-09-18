@@ -1,0 +1,125 @@
+CREATE TABLE [production].[production.categories] (
+  [category_id] int NOT NULL IDENTITY(1,1),
+  [category_name] varchar(255) NOT NULL
+)
+ALTER TABLE [production].[production.categories] ADD CONSTRAINT [PK__categori__D54EE9B4CD67B8A0] PRIMARY KEY ([category_id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [production].[production.brands] (
+  [brand_id] int NOT NULL IDENTITY(1,1),
+  [brand_name] varchar(255) NOT NULL
+)
+ALTER TABLE [production].[production.brands] ADD CONSTRAINT [PK__brands__5E5A8E2704BD26A6] PRIMARY KEY ([brand_id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [production].[production.products] (
+  [product_id] int NOT NULL IDENTITY(1,1),
+  [product_name] varchar(255) NOT NULL,
+  [brand_id] int NOT NULL,
+  [category_id] int NOT NULL,
+  [model_year] smallint NOT NULL,
+  [list_price] decimal(10,2) NOT NULL
+)
+ALTER TABLE [production].[production.products] ADD CONSTRAINT [PK__products__47027DF5759482C8] PRIMARY KEY ([product_id]);
+ALTER TABLE [production].[production.products] ADD CONSTRAINT [FK__products__catego__45F365D3] FOREIGN KEY (category_id) REFERENCES [production].[categories](category_id);
+ALTER TABLE [production].[production.products] ADD CONSTRAINT [FK__products__brand___46E78A0C] FOREIGN KEY (brand_id) REFERENCES [production].[brands](brand_id);
+
+---------------------------------------------------------------------------
+CREATE TABLE [sales].[sales.customers] (
+  [customer_id] int NOT NULL IDENTITY(1,1),
+  [first_name] varchar(255) NOT NULL,
+  [last_name] varchar(255) NOT NULL,
+  [phone] varchar(25) NULL,
+  [email] varchar(255) NOT NULL,
+  [street] varchar(255) NULL,
+  [city] varchar(50) NULL,
+  [state] varchar(25) NULL,
+  [zip_code] varchar(5) NULL
+)
+ALTER TABLE [sales].[sales.customers] ADD CONSTRAINT [PK__customer__CD65CB8599369475] PRIMARY KEY ([customer_id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [sales].[sales.stores] (
+  [store_id] int NOT NULL IDENTITY(1,1),
+  [store_name] varchar(255) NOT NULL,
+  [phone] varchar(25) NULL,
+  [email] varchar(255) NULL,
+  [street] varchar(255) NULL,
+  [city] varchar(255) NULL,
+  [state] varchar(10) NULL,
+  [zip_code] varchar(5) NULL
+)
+ALTER TABLE [sales].[sales.stores] ADD CONSTRAINT [PK__stores__A2F2A30CA6A859A8] PRIMARY KEY ([store_id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [sales].[sales.staffs] (
+  [staff_id] int NOT NULL IDENTITY(1,1),
+  [first_name] varchar(50) NOT NULL,
+  [last_name] varchar(50) NOT NULL,
+  [email] varchar(255) NOT NULL,
+  [phone] varchar(25) NULL,
+  [active] tinyint NOT NULL,
+  [store_id] int NOT NULL,
+  [manager_id] int NULL
+)
+ALTER TABLE [sales].[sales.staffs] ADD CONSTRAINT [PK__staffs__1963DD9C8908600E] PRIMARY KEY ([staff_id]);
+ALTER TABLE [sales].[sales.staffs] ADD CONSTRAINT [FK__staffs__store_id__4E88ABD4] FOREIGN KEY (store_id) REFERENCES [sales].[stores](store_id);
+ALTER TABLE [sales].[sales.staffs] ADD CONSTRAINT [FK__staffs__manager___4F7CD00D] FOREIGN KEY (manager_id) REFERENCES [sales].[staffs](staff_id);
+
+---------------------------------------------------------------------------
+CREATE TABLE [sales].[sales.orders] (
+  [order_id] int NOT NULL IDENTITY(1,1),
+  [customer_id] int NULL,
+  [order_status] tinyint NOT NULL,
+  [order_date] date NOT NULL,
+  [required_date] date NOT NULL,
+  [shipped_date] date NULL,
+  [store_id] int NOT NULL,
+  [staff_id] int NOT NULL
+)
+ALTER TABLE [sales].[sales.orders] ADD CONSTRAINT [PK__orders__4659622995C08F00] PRIMARY KEY ([order_id]);
+ALTER TABLE [sales].[sales.orders] ADD CONSTRAINT [FK__orders__customer__52593CB8] FOREIGN KEY (customer_id) REFERENCES [sales].[customers](customer_id);
+ALTER TABLE [sales].[sales.orders] ADD CONSTRAINT [FK__orders__store_id__534D60F1] FOREIGN KEY (store_id) REFERENCES [sales].[stores](store_id);
+ALTER TABLE [sales].[sales.orders] ADD CONSTRAINT [FK__orders__staff_id__5441852A] FOREIGN KEY (staff_id) REFERENCES [sales].[staffs](staff_id);
+
+---------------------------------------------------------------------------
+CREATE TABLE [sales].[sales.order_items] (
+  [order_id] int NOT NULL,
+  [item_id] int NOT NULL,
+  [product_id] int NOT NULL,
+  [quantity] int NOT NULL,
+  [list_price] decimal(10,2) NOT NULL,
+  [discount] decimal(4,2) NOT NULL
+)
+ALTER TABLE [sales].[sales.order_items] ADD CONSTRAINT [PK__order_it__837942D4C8F0FCAB] PRIMARY KEY ([order_id], [item_id]);
+ALTER TABLE [sales].[sales.order_items] ADD CONSTRAINT [FK__order_ite__produ__59063A47] FOREIGN KEY (product_id) REFERENCES [production].[products](product_id);
+ALTER TABLE [sales].[sales.order_items] ADD CONSTRAINT [FK__order_ite__order__5812160E] FOREIGN KEY (order_id) REFERENCES [sales].[orders](order_id);
+ALTER TABLE [sales].[sales.order_items] ADD CONSTRAINT [DF__order_ite__disco__571DF1D5] DEFAULT ((0)) FOR [discount];
+
+---------------------------------------------------------------------------
+CREATE TABLE [production].[production.stocks] (
+  [store_id] int NOT NULL,
+  [product_id] int NOT NULL,
+  [quantity] int NULL
+)
+ALTER TABLE [production].[production.stocks] ADD CONSTRAINT [PK__stocks__E68284D32CB44C54] PRIMARY KEY ([store_id], [product_id]);
+ALTER TABLE [production].[production.stocks] ADD CONSTRAINT [FK__stocks__product___5CD6CB2B] FOREIGN KEY (product_id) REFERENCES [production].[products](product_id);
+ALTER TABLE [production].[production.stocks] ADD CONSTRAINT [FK__stocks__store_id__5BE2A6F2] FOREIGN KEY (store_id) REFERENCES [sales].[stores](store_id);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.user] (
+  [id] int NOT NULL IDENTITY(1,1),
+  [name] varchar(50) NOT NULL,
+  [createdate] datetime NULL
+)
+ALTER TABLE [dbo].[dbo.user] ADD CONSTRAINT [PK__user__3213E83FFC3256E4] PRIMARY KEY ([id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.userlog] (
+  [id] int NOT NULL IDENTITY(1,1),
+  [name] varchar(50) NOT NULL,
+  [createdate] datetime NULL
+)
+ALTER TABLE [dbo].[dbo.userlog] ADD CONSTRAINT [PK__userlog__3213E83F13FE1FF3] PRIMARY KEY ([id]);
+
+---------------------------------------------------------------------------

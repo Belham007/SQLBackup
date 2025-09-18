@@ -1,0 +1,43 @@
+CREATE TABLE [dbo].[dbo.Table_1] (
+  [Id] varchar(1000) NOT NULL,
+  [Year] varchar(1000) NULL,
+  [Industry_aggregation] varchar(1000) NULL,
+  [Industry_code] varchar(1000) NULL,
+  [Industry_name] varchar(1000) NULL
+)
+ALTER TABLE [dbo].[dbo.Table_1] ADD CONSTRAINT [PK__Table_1__3214EC074AACB64E] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.ADO NET Destination] (
+  [ï»¿Id] varchar(50) NULL,
+  [Year] varchar(50) NULL,
+  [Industry_aggregation] varchar(50) NULL,
+  [Industry_code] varchar(50) NULL,
+  [Industry_name] varchar(50) NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Table_2] (
+  [Username] varchar(100) NOT NULL,
+  [Identifier] varchar(100) NOT NULL,
+  [Firstname] varchar(100) NOT NULL,
+  [Lastname] varchar(100) NOT NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.table3] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.table4] (
+  [Username] nvarchar(100) NULL,
+  [Identifier] nvarchar(100) NULL,
+  [First name] nvarchar(100) NULL,
+  [Last name] nvarchar(100) NULL
+)
+
+---------------------------------------------------------------------------

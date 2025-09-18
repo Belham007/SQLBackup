@@ -1,0 +1,13 @@
+CREATE TABLE [dbo].[dbo.Employees] (
+  [Id] int NOT NULL IDENTITY(1,1),
+  [FirstName] varchar(50) NOT NULL,
+  [LastName] nvarchar(MAX) NOT NULL,
+  [DateOfBirth] datetime2 NOT NULL,
+  [Email] nvarchar(MAX) NOT NULL,
+  [Salary] float NOT NULL,
+  [Remark] varchar(50) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Employees] ADD CONSTRAINT [PK_Employees] PRIMARY KEY ([Id]);
+ALTER TABLE [dbo].[dbo.Employees] ADD CONSTRAINT [DF__Employees__Remar__24927208] DEFAULT ('') FOR [Remark];
+
+---------------------------------------------------------------------------

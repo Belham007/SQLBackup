@@ -1,0 +1,17 @@
+CREATE TABLE [dbo].[dbo.__EFMigrationsHistory] (
+  [MigrationId] nvarchar(300) NOT NULL,
+  [ProductVersion] nvarchar(64) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.__EFMigrationsHistory] ADD CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Contacts] (
+  [Id] uniqueidentifier NOT NULL,
+  [FullName] nvarchar(MAX) NOT NULL,
+  [Email] nvarchar(MAX) NOT NULL,
+  [Phone] nvarchar(MAX) NOT NULL,
+  [Address] nvarchar(MAX) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Contacts] ADD CONSTRAINT [PK_Contacts] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------

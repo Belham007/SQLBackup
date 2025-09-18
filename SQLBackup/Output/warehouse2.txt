@@ -1,0 +1,39 @@
+CREATE TABLE [dbo].[dbo.table4] (
+  [Username] nvarchar(100) NULL,
+  [Identifier] nvarchar(100) NULL,
+  [First name] nvarchar(100) NULL,
+  [Last name] nvarchar(100) NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.table5] (
+  [Username] nvarchar(100) NULL,
+  [Identifier] nvarchar(100) NULL,
+  [First name] nvarchar(100) NULL,
+  [Last name] nvarchar(100) NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.table6] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.table7] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL,
+  [Filename] varchar(MAX) NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.errorssis] (
+  [package] varchar(5000) NULL,
+  [errordesc] varchar(5000) NULL
+)
+
+---------------------------------------------------------------------------

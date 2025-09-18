@@ -1,0 +1,39 @@
+CREATE TABLE [dbo].[dbo.__EFMigrationsHistory] (
+  [MigrationId] nvarchar(300) NOT NULL,
+  [ProductVersion] nvarchar(64) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.__EFMigrationsHistory] ADD CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Employees] (
+  [Id] int NOT NULL IDENTITY(1,1),
+  [FirstName] varchar(50) NOT NULL,
+  [LastName] nvarchar(MAX) NOT NULL,
+  [DateOfBirth] datetime2 NOT NULL,
+  [Email] nvarchar(MAX) NOT NULL,
+  [Salary] float NOT NULL,
+  [Remark] varchar(50) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Employees] ADD CONSTRAINT [PK_Employees] PRIMARY KEY ([Id]);
+ALTER TABLE [dbo].[dbo.Employees] ADD CONSTRAINT [DF__Employees__Remar__38996AB5] DEFAULT ('') FOR [Remark];
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Register] (
+  [Id] int NOT NULL IDENTITY(1,1),
+  [RollNo] nvarchar(MAX) NOT NULL,
+  [Name] nvarchar(MAX) NOT NULL,
+  [Gender] nvarchar(MAX) NOT NULL,
+  [DOB] datetime2 NOT NULL,
+  [Class] int NOT NULL,
+  [Address] nvarchar(MAX) NOT NULL,
+  [Transport] nvarchar(MAX) NOT NULL,
+  [Cricket] bit NOT NULL,
+  [Football] bit NOT NULL,
+  [Kabadi] bit NOT NULL,
+  [Coco] bit NOT NULL,
+  [Comments] nvarchar(MAX) NOT NULL,
+  [Photo] varbinary NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Register] ADD CONSTRAINT [PK_Register] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------

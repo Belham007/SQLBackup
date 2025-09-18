@@ -1,0 +1,12 @@
+CREATE TABLE [dbo].[dbo.Book2] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL,
+  [DataCnv_Identifier] numeric(18,0) NULL,
+  [Derived_Firstname] nvarchar(6) NULL,
+  [Copy_Firstname] varchar(50) NULL,
+  [Charmap_Firstname] varchar(50) NULL
+)
+
+---------------------------------------------------------------------------

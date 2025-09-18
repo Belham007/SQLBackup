@@ -1,0 +1,93 @@
+CREATE TABLE [dbo].[dbo.__EFMigrationsHistory] (
+  [MigrationId] nvarchar(300) NOT NULL,
+  [ProductVersion] nvarchar(64) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.__EFMigrationsHistory] ADD CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Category] (
+  [Id] int NOT NULL IDENTITY(1,1),
+  [Name] nvarchar(MAX) NULL
+)
+ALTER TABLE [dbo].[dbo.Category] ADD CONSTRAINT [PK_Category] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_customer] (
+  [ID] int NOT NULL IDENTITY(1,1),
+  [Name] varchar(50) NULL,
+  [Email] varchar(50) NULL,
+  [Phone] varchar(50) NULL,
+  [CreditLimit] int NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_customer] ADD CONSTRAINT [PK_tbl_customer] PRIMARY KEY ([ID]);
+ALTER TABLE [dbo].[dbo.tbl_customer] ADD CONSTRAINT [DF__tbl_custo__Credi__286302EC] DEFAULT ((0)) FOR [CreditLimit];
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_designation] (
+  [code] nvarchar(20) NOT NULL,
+  [Name] nvarchar(100) NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_designation] ADD CONSTRAINT [PK_tbl_designation] PRIMARY KEY ([code]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_employee] (
+  [code] int NOT NULL IDENTITY(1,1),
+  [name] varchar(50) NULL,
+  [email] varchar(50) NULL,
+  [Phone] varchar(50) NULL,
+  [designation] varchar(50) NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_employee] ADD CONSTRAINT [PK_tbl_employee] PRIMARY KEY ([code]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_menu] (
+  [Id] varchar(50) NOT NULL,
+  [Name] varchar(50) NULL,
+  [LinkName] varchar(50) NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_menu] ADD CONSTRAINT [PK_tbl_menu] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_permission] (
+  [RoleId] varchar(50) NOT NULL,
+  [MenuId] varchar(50) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_permission] ADD CONSTRAINT [PK_tbl_permission] PRIMARY KEY ([RoleId], [MenuId]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_product] (
+  [Code] int NOT NULL IDENTITY(1,1),
+  [Name] varchar(50) NULL,
+  [Amount] decimal(18,3) NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_product] ADD CONSTRAINT [PK_tbl_product] PRIMARY KEY ([Code]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_refreshtoken] (
+  [UserId] varchar(50) NOT NULL,
+  [TokenId] varchar(50) NULL,
+  [RefreshToken] nvarchar(MAX) NULL,
+  [IsActive] bit NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_refreshtoken] ADD CONSTRAINT [PK_tbl_refreshtoken] PRIMARY KEY ([UserId]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_role] (
+  [roleid] varchar(50) NOT NULL,
+  [Name] varchar(50) NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_role] ADD CONSTRAINT [PK_tbl_role] PRIMARY KEY ([roleid]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.tbl_user] (
+  [userid] varchar(50) NOT NULL,
+  [Name] varchar(50) NULL,
+  [password] varchar(50) NULL,
+  [Email] varchar(50) NULL,
+  [Role] varchar(50) NULL,
+  [IsActive] bit NULL
+)
+ALTER TABLE [dbo].[dbo.tbl_user] ADD CONSTRAINT [PK_tbl_user] PRIMARY KEY ([userid]);
+ALTER TABLE [dbo].[dbo.tbl_user] ADD CONSTRAINT [DF__tbl_user__IsActi__38996AB5] DEFAULT ((1)) FOR [IsActive];
+
+---------------------------------------------------------------------------

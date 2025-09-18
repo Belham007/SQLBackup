@@ -1,0 +1,25 @@
+CREATE TABLE [dbo].[dbo.__EFMigrationsHistory] (
+  [MigrationId] nvarchar(300) NOT NULL,
+  [ProductVersion] nvarchar(64) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.__EFMigrationsHistory] ADD CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Products] (
+  [ProductId] int NOT NULL IDENTITY(1,1),
+  [ProductName] nvarchar(MAX) NOT NULL,
+  [ProductDescription] nvarchar(MAX) NOT NULL,
+  [ProductPrice] int NOT NULL,
+  [ProductStock] int NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Products] ADD CONSTRAINT [PK_Products] PRIMARY KEY ([ProductId]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Users] (
+  [UserId] int NOT NULL IDENTITY(1,1),
+  [UserName] nvarchar(MAX) NOT NULL,
+  [Address] nvarchar(MAX) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Users] ADD CONSTRAINT [PK_Users] PRIMARY KEY ([UserId]);
+
+---------------------------------------------------------------------------

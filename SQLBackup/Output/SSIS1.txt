@@ -1,0 +1,45 @@
+CREATE TABLE [dbo].[dbo.Book1] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Book2] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL,
+  [Derived_Firstname] nvarchar(100) NULL,
+  [Copy_Firstname] varchar(50) NULL,
+  [Charmap_Firstname] varchar(50) NULL,
+  [DataCnv_Identifier] int NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Book3] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL,
+  [Fullpath] nvarchar(52) NULL
+)
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Persons] (
+  [Id] int NOT NULL IDENTITY(1,1),
+  [Package] varchar(800) NULL,
+  [ErrorMessage] varchar(800) NULL
+)
+ALTER TABLE [dbo].[dbo.Persons] ADD CONSTRAINT [PK__Persons__3214EC071285FAF2] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.ErrorLog] (
+  [Id] int NOT NULL IDENTITY(1,1),
+  [Package] varchar(800) NULL,
+  [ErrorMessage] varchar(800) NULL
+)
+ALTER TABLE [dbo].[dbo.ErrorLog] ADD CONSTRAINT [PK__ErrorLog__3214EC076B812F66] PRIMARY KEY ([Id]);
+
+---------------------------------------------------------------------------

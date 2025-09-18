@@ -1,0 +1,9 @@
+CREATE TABLE [dbo].[dbo.Persons] (
+  [ID] int NOT NULL,
+  [LastName] varchar(255) NOT NULL,
+  [FirstName] varchar(255) NULL,
+  [Age] int NULL
+)
+ALTER TABLE [dbo].[dbo.Persons] ADD CONSTRAINT [PK__Persons__3214EC27833FACAB] PRIMARY KEY ([ID]);
+
+---------------------------------------------------------------------------

@@ -1,0 +1,9 @@
+CREATE TABLE [dbo].[dbo.Book1] (
+  [Username] varchar(50) NULL,
+  [Identifier] varchar(50) NULL,
+  [First name] varchar(50) NULL,
+  [Last name] varchar(50) NULL,
+  [Type] varchar(50) NULL
+)
+
+---------------------------------------------------------------------------

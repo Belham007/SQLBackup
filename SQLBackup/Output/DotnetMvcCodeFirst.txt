@@ -1,0 +1,19 @@
+CREATE TABLE [dbo].[dbo.Products] (
+  [ProductID] int NOT NULL IDENTITY(1,1),
+  [ProductName] nvarchar(MAX) NOT NULL,
+  [Price] decimal(18,2) NOT NULL,
+  [Qty] int NOT NULL,
+  [Remarks] nvarchar(MAX) NULL
+)
+ALTER TABLE [dbo].[dbo.Products] ADD CONSTRAINT [PK_dbo.Products] PRIMARY KEY ([ProductID]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.__MigrationHistory] (
+  [MigrationId] nvarchar(300) NOT NULL,
+  [ContextKey] nvarchar(600) NOT NULL,
+  [Model] varbinary NOT NULL,
+  [ProductVersion] nvarchar(64) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.__MigrationHistory] ADD CONSTRAINT [PK_dbo.__MigrationHistory] PRIMARY KEY ([MigrationId], [ContextKey]);
+
+---------------------------------------------------------------------------

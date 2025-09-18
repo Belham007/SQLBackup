@@ -1,0 +1,193 @@
+CREATE TABLE [dbo].[dbo.ClassStandings] (
+  [ClassStandingCode] varchar(2) NOT NULL,
+  [ClassStandingName] varchar(25) NOT NULL,
+  [DegreeLevelCode] varchar(1) NOT NULL,
+  [RequiredCredits] int NOT NULL
+)
+ALTER TABLE [dbo].[dbo.ClassStandings] ADD CONSTRAINT [pk_class_standings] PRIMARY KEY ([ClassStandingCode]);
+ALTER TABLE [dbo].[dbo.ClassStandings] ADD CONSTRAINT [fk_class_stdgs_degree_level_cd] FOREIGN KEY (DegreeLevelCode) REFERENCES [dbo].[DegreeLevels](DegreeLevelCode);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.CourseEnrollments] (
+  [CourseEnrollmentId] int NOT NULL IDENTITY(1,1),
+  [CourseOfferingId] int NOT NULL,
+  [StudentId] int NOT NULL,
+  [Grade] varchar(1) NULL
+)
+ALTER TABLE [dbo].[dbo.CourseEnrollments] ADD CONSTRAINT [pk_CourseEnrollments] PRIMARY KEY ([CourseEnrollmentId]);
+ALTER TABLE [dbo].[dbo.CourseEnrollments] ADD CONSTRAINT [fk_CourseEnrollments_CourseOfferings] FOREIGN KEY (CourseOfferingId) REFERENCES [dbo].[CourseOfferings](CourseOfferingId);
+ALTER TABLE [dbo].[dbo.CourseEnrollments] ADD CONSTRAINT [fk_CourseEnrollments_Grade] FOREIGN KEY (Grade) REFERENCES [dbo].[Grades](Grade);
+ALTER TABLE [dbo].[dbo.CourseEnrollments] ADD CONSTRAINT [fk_CourseEnrollments_StudentId] FOREIGN KEY (StudentId) REFERENCES [dbo].[Students](StudentId);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.CourseOfferings] (
+  [CourseOfferingId] int NOT NULL IDENTITY(1,1),
+  [DepartmentCode] varchar(2) NOT NULL,
+  [CourseNumber] int NOT NULL,
+  [TermCode] varchar(6) NOT NULL,
+  [Section] int NOT NULL,
+  [Capacity] int NOT NULL
+)
+ALTER TABLE [dbo].[dbo.CourseOfferings] ADD CONSTRAINT [pk_CourseOfferings] PRIMARY KEY ([CourseOfferingId]);
+ALTER TABLE [dbo].[dbo.CourseOfferings] ADD CONSTRAINT [fk_CourseOfferings_Courses] FOREIGN KEY (DepartmentCode) REFERENCES [dbo].[Courses](DepartmentCode);
+ALTER TABLE [dbo].[dbo.CourseOfferings] ADD CONSTRAINT [fk_CourseOfferings_Courses] FOREIGN KEY (CourseNumber) REFERENCES [dbo].[Courses](CourseNumber);
+ALTER TABLE [dbo].[dbo.CourseOfferings] ADD CONSTRAINT [fk_CourseOfferings_TermCode] FOREIGN KEY (TermCode) REFERENCES [dbo].[Terms](TermCode);
+ALTER TABLE [dbo].[dbo.CourseOfferings] ADD CONSTRAINT [ck_course_offerings_capacity] CHECK ([Capacity]>(0) AND [capacity]<(1000));
+CREATE INDEX [IX_CourseOfferings_TermCode] ON [dbo].[dbo.CourseOfferings] ([TermCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Courses] (
+  [DepartmentCode] varchar(2) NOT NULL,
+  [CourseNumber] int NOT NULL,
+  [CourseTitle] varchar(64) NOT NULL,
+  [CourseDescription] varchar(512) NOT NULL,
+  [Credits] decimal(3,1) NOT NULL,
+  [MaximumSectionSize] int NULL
+)
+ALTER TABLE [dbo].[dbo.Courses] ADD CONSTRAINT [pk_courses] PRIMARY KEY ([DepartmentCode], [CourseNumber]);
+ALTER TABLE [dbo].[dbo.Courses] ADD CONSTRAINT [fk_Courses_DepartmentCode] FOREIGN KEY (DepartmentCode) REFERENCES [dbo].[Departments](DepartmentCode);
+ALTER TABLE [dbo].[dbo.Courses] ADD CONSTRAINT [ck_CourseNumber] CHECK ([CourseNumber]>=(9) AND [CourseNumber]<=(1000));
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.DegreeLevels] (
+  [DegreeLevelCode] varchar(1) NOT NULL,
+  [DegreeLevelName] varchar(20) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.DegreeLevels] ADD CONSTRAINT [pk_degree_levels] PRIMARY KEY ([DegreeLevelCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.DegreeRequirements] (
+  [RequirementId] int NOT NULL IDENTITY(1,1),
+  [DegreeId] int NOT NULL,
+  [ClassStandingCode] varchar(2) NOT NULL,
+  [SessionCode] varchar(2) NOT NULL,
+  [DepartmentCode] varchar(2) NOT NULL,
+  [CourseNumber] int NOT NULL
+)
+ALTER TABLE [dbo].[dbo.DegreeRequirements] ADD CONSTRAINT [pk_DegreeRequirements] PRIMARY KEY ([RequirementId]);
+ALTER TABLE [dbo].[dbo.DegreeRequirements] ADD CONSTRAINT [fk_DegreeReqirements_ClassStandingCode] FOREIGN KEY (ClassStandingCode) REFERENCES [dbo].[ClassStandings](ClassStandingCode);
+ALTER TABLE [dbo].[dbo.DegreeRequirements] ADD CONSTRAINT [fk_DegreeReqirements_Courses] FOREIGN KEY (DepartmentCode) REFERENCES [dbo].[Courses](DepartmentCode);
+ALTER TABLE [dbo].[dbo.DegreeRequirements] ADD CONSTRAINT [fk_DegreeReqirements_Courses] FOREIGN KEY (CourseNumber) REFERENCES [dbo].[Courses](CourseNumber);
+ALTER TABLE [dbo].[dbo.DegreeRequirements] ADD CONSTRAINT [fk_DegreeReqirements_SessionCode] FOREIGN KEY (SessionCode) REFERENCES [dbo].[Sessions](SessionCode);
+ALTER TABLE [dbo].[dbo.DegreeRequirements] ADD CONSTRAINT [fk_DegreeReqirements_DegreeId] FOREIGN KEY (DegreeId) REFERENCES [dbo].[Degrees](DegreeId);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.DegreeTypes] (
+  [DegreeTypeCode] varchar(3) NOT NULL,
+  [DegreeTypeName] varchar(25) NOT NULL,
+  [DegreeLevelCode] varchar(1) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.DegreeTypes] ADD CONSTRAINT [pk_DegreeTypes] PRIMARY KEY ([DegreeTypeCode]);
+ALTER TABLE [dbo].[dbo.DegreeTypes] ADD CONSTRAINT [fk_degree_types_degree_type_cd] FOREIGN KEY (DegreeLevelCode) REFERENCES [dbo].[DegreeLevels](DegreeLevelCode);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Departments] (
+  [DepartmentCode] varchar(2) NOT NULL,
+  [DepartmentName] varchar(25) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Departments] ADD CONSTRAINT [pk_departments] PRIMARY KEY ([DepartmentCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Grades] (
+  [Grade] varchar(1) NOT NULL,
+  [Points] decimal(2,1) NULL,
+  [IncludeInGpa] bit NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Grades] ADD CONSTRAINT [pk_grades] PRIMARY KEY ([Grade]);
+ALTER TABLE [dbo].[dbo.Grades] ADD CONSTRAINT [DF__Grades__IncludeI__276EDEB3] DEFAULT ((1)) FOR [IncludeInGpa];
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Sessions] (
+  [SessionCode] varchar(2) NOT NULL,
+  [SessionName] varchar(10) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Sessions] ADD CONSTRAINT [pk_sessions] PRIMARY KEY ([SessionCode]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Students] (
+  [StudentId] int NOT NULL IDENTITY(10000,1),
+  [FirstName] varchar(40) NOT NULL,
+  [MiddleName] varchar(40) NOT NULL,
+  [LastName] varchar(40) NOT NULL,
+  [Gender] varchar(1) NOT NULL,
+  [StreetAddress] varchar(50) NOT NULL,
+  [City] varchar(30) NOT NULL,
+  [State] varchar(2) NOT NULL,
+  [ZipCode] varchar(5) NOT NULL,
+  [Telephone] varchar(20) NOT NULL,
+  [email] varchar(80) NOT NULL,
+  [DateOfBirth] date NOT NULL,
+  [DegreePursued] int NOT NULL,
+  [ClassStandingCode] varchar(2) NULL,
+  [StudentStatus] varchar(1) NOT NULL,
+  [EnrollmentTerm] varchar(6) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Students] ADD CONSTRAINT [pk_students] PRIMARY KEY ([StudentId]);
+ALTER TABLE [dbo].[dbo.Students] ADD CONSTRAINT [fk_Students_ClassStanding] FOREIGN KEY (ClassStandingCode) REFERENCES [dbo].[ClassStandings](ClassStandingCode);
+ALTER TABLE [dbo].[dbo.Students] ADD CONSTRAINT [fk_Students_EnrollmentTerm] FOREIGN KEY (EnrollmentTerm) REFERENCES [dbo].[Terms](TermCode);
+ALTER TABLE [dbo].[dbo.Students] ADD CONSTRAINT [fk_Students_DegreePursued] FOREIGN KEY (DegreePursued) REFERENCES [dbo].[Degrees](DegreeId);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Terms] (
+  [TermCode] varchar(6) NOT NULL,
+  [SessionCode] varchar(2) NOT NULL,
+  [Year] int NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Terms] ADD CONSTRAINT [pk_terms] PRIMARY KEY ([TermCode]);
+ALTER TABLE [dbo].[dbo.Terms] ADD CONSTRAINT [fk_Terms_SessionCode] FOREIGN KEY (SessionCode) REFERENCES [dbo].[Sessions](SessionCode);
+ALTER TABLE [dbo].[dbo.Terms] ADD CONSTRAINT [ck_year] CHECK ([Year]>=(1990) AND [Year]<=(2050));
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Degrees] (
+  [DegreeId] int NOT NULL IDENTITY(1,1),
+  [DepartmentCode] varchar(2) NOT NULL,
+  [DegreeTypeCode] varchar(3) NOT NULL,
+  [DegreeName] varchar(64) NOT NULL
+)
+ALTER TABLE [dbo].[dbo.Degrees] ADD CONSTRAINT [pk_degrees] PRIMARY KEY ([DegreeId]);
+ALTER TABLE [dbo].[dbo.Degrees] ADD CONSTRAINT [fk_degrees_DegreeTypeCode] FOREIGN KEY (DegreeTypeCode) REFERENCES [dbo].[DegreeTypes](DegreeTypeCode);
+ALTER TABLE [dbo].[dbo.Degrees] ADD CONSTRAINT [fk_degrees_DepartmentCode] FOREIGN KEY (DepartmentCode) REFERENCES [dbo].[Departments](DepartmentCode);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.Applicants] (
+  [ApplicantId] int NOT NULL IDENTITY(1,1),
+  [FirstName] varchar(40) NOT NULL,
+  [MiddleName] varchar(40) NOT NULL,
+  [LastName] varchar(40) NOT NULL,
+  [Gender] varchar(1) NOT NULL,
+  [StreetAddress] varchar(50) NOT NULL,
+  [City] varchar(30) NOT NULL,
+  [State] varchar(2) NOT NULL,
+  [ZipCode] varchar(5) NOT NULL,
+  [Telephone] varchar(20) NOT NULL,
+  [Email] varchar(80) NOT NULL,
+  [DateOfBirth] date NOT NULL,
+  [ApplicationReceivedDate] date NOT NULL,
+  [EntryTerm] varchar(6) NOT NULL,
+  [ApplicationType] varchar(1) NOT NULL,
+  [Gpa] decimal(3,2) NULL,
+  [SatMathScore] int NULL,
+  [SatReadingScore] int NULL,
+  [SatWritingScore] int NULL,
+  [EssayScore] int NULL,
+  [ApplicationStatus] varchar(1) NOT NULL,
+  [AdmissionPoints] float NULL
+)
+ALTER TABLE [dbo].[dbo.Applicants] ADD CONSTRAINT [pk_applicants] PRIMARY KEY ([ApplicantId]);
+ALTER TABLE [dbo].[dbo.Applicants] ADD CONSTRAINT [fk_applicants_entry_term] FOREIGN KEY (EntryTerm) REFERENCES [dbo].[Terms](TermCode);
+ALTER TABLE [dbo].[dbo.Applicants] ADD CONSTRAINT [DF__Applicant__Appli__787EE5A0] DEFAULT ('N') FOR [ApplicationStatus];
+ALTER TABLE [dbo].[dbo.Applicants] ADD CONSTRAINT [ck_applications_gender] CHECK ([gender]='F' OR [gender]='M');
+ALTER TABLE [dbo].[dbo.Applicants] ADD CONSTRAINT [ck_applications_gpa] CHECK ([gpa]>=(0.0) AND [gpa]<=(4.0));
+ALTER TABLE [dbo].[dbo.Applicants] ADD CONSTRAINT [ck_appls_sat_math_score] CHECK ([SatMathScore]>=(200) AND [SatMathScore]<=(800));
+ALTER TABLE [dbo].[dbo.Applicants] ADD CONSTRAINT [ck_appls_sat_reading_score] CHECK ([SatReadingScore]>=(200) AND [SatReadingScore]<=(800));
+ALTER TABLE [dbo].[dbo.Applicants] ADD CONSTRAINT [ck_appls_sat_writing_score] CHECK ([SatWritingScore]>=(200) AND [SatWritingScore]<=(800));
+CREATE INDEX [IX_Applicants_LastName] ON [dbo].[dbo.Applicants] ([LastName]);
+
+---------------------------------------------------------------------------
+CREATE TABLE [dbo].[dbo.StudentProfiles] (
+  [StudentId] int NOT NULL,
+  [ProfileId] int NOT NULL
+)
+ALTER TABLE [dbo].[dbo.StudentProfiles] ADD CONSTRAINT [PK__StudentP__32C52B99D580B8FD] PRIMARY KEY ([StudentId]);
+
+---------------------------------------------------------------------------
